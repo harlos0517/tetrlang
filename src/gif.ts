@@ -10,16 +10,15 @@ export const defaultGifOptions: GifOptions = {
 
 export const generateGif = async(
   compiled: Compiled,
-  outputPath: string,
   options: GifOptions = defaultGifOptions,
-): Promise<void> => {
+  outputPath?: string,
+) => {
   const states = generateStates(compiled)
   const frames = await Promise.all(states.map(async state => {
     const { canvas } = createFrame(state)
     return canvas.toBuffer('image/png')
   }))
 
-  await sharp(frames, { join: { animated: true } })
-    .gif(options)
-    .toFile(outputPath)
+  const gif = sharp(frames, { join: { animated: true } }).gif(options)
+  return outputPath ? await gif.toFile(outputPath) : await gif.toBuffer()
 }

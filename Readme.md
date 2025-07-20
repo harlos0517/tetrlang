@@ -21,9 +21,15 @@
 ```
 2,,,,-1,-2,,,-3,:Jr[_Tr[_S[r+r_Z[+r_
 ```
+
 - order provided
 ```
 2,,,,-1,-2,,,-3,S/JTLZ:r[_r[_/[r+r_[+r_
+```
+
+- PCO
+```
+I/TSZILJOTSZ:r[_+[_[_]_r>>_c]_]<_c>__c+c<_
 ```
 
 ## spec
@@ -42,8 +48,16 @@ range_begin = connector col
 range_end = col connector
 row = range_begin? (range | col)* range_end?
 board = (row row_sep)*
-order = piece? hold piece+
+order = piece hold piece+
 op_with_order = hold? move* lock
 op_no_order = piece move* lock
 tetrio_operations = board (order start op_with_order* | start op_no_order*)
 ```
+
+# todo
+- add key handling visualization
+- adjust format to allow omitting some parameters
+- aesthetics redesign
+- dynamic delay for different operations
+- settings preset
+- spin indicator

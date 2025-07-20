@@ -7,12 +7,14 @@
   "license": "MIT",
   "scripts": {
     "lint": "eslint",
-    "tetr": "tsx src/cli.ts"
+    "tetr": "tsx src/cli.ts",
+    "bot": "tsx src/bot.ts"
   },
   "dependencies": {
     "canvas": "^3.1.2",
     "commander": "^14.0.0",
     "discord.js": "^14.21.0",
+    "dotenv": "^17.2.0",
     "sharp": "^0.34.3",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3"

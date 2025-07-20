@@ -22,7 +22,7 @@ program.command('gen')
   .option('-o, --output <file>', 'output file name', 'output.gif')
   .action(async(str, options) => {
     const compiled = compiler(str)
-    await generateGif(compiled, options.output)
+    await generateGif(compiled, options, options.output)
     console.log(`GIF generated at ${options.output}`)
   })
 
