@@ -56,7 +56,7 @@ export const generateStates = (data: Compiled): TetrisState[] => {
 
 const createInitialState = (data: Compiled): TetrisState => ({
   grid: boardToGrid(data.board),
-  piece: data.order?.next[0] || null,
+  piece: null,
   position: [4, 21] as Position,
   rotation: ROTATION.NORTH,
   hold: data.order?.holding || null,

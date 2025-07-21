@@ -4,7 +4,7 @@ import { createFrame } from './renderer'
 import { Compiled } from './types'
 
 export const defaultGifOptions: GifOptions = {
-  delay: 100,
+  delay: 500,
   loop: 0,
 }
 
@@ -19,6 +19,11 @@ export const generateGif = async(
     return canvas.toBuffer('image/png')
   }))
 
-  const gif = sharp(frames, { join: { animated: true } }).gif(options)
+  const gifOptions: GifOptions = {
+    ...defaultGifOptions,
+    ...options,
+    delay: new Array(frames.length).fill(options.delay),
+  }
+  const gif = sharp(frames, { join: { animated: true } }).gif(gifOptions)
   return outputPath ? await gif.toFile(outputPath) : await gif.toBuffer()
 }
