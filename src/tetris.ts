@@ -2,6 +2,7 @@ import { Grid, boardToGrid, clearLines, isFillable } from './grid'
 import { getNextRotation, getPiecePositions, kickTest } from './srs'
 import {
   Compiled,
+  HOLD,
   KEY,
   LOCK,
   MOVE,
@@ -13,7 +14,9 @@ import {
   ROTATION,
 } from './types'
 
-export interface TetrisState {
+const dup = <T>(obj: T): T => JSON.parse(JSON.stringify(obj))
+
+export interface TetrisStateData {
   grid: Grid
   piece: PIECE | null
   position: Position
@@ -24,230 +27,296 @@ export interface TetrisState {
   key: KEY | null
   keyUp: boolean
   clearingLines?: number[]
+  operation: MOVES | ROTATES | LOCK | HOLD | 'spawn' | 'clearing' | 'init'
 }
 
-export const generateStates = (data: Compiled): TetrisState[] => {
-  const states: TetrisState[] = []
-  const lastState = () => states[states.length - 1]
+export class TetrisSession {
+  public readonly data: Compiled
+  public readonly states: TetrisState[]
+  public generated = false
 
-  try {
-    const initialState = createInitialState(data)
-    states.push(initialState)
+  constructor(data: Compiled) {
+    this.data = data
+    this.states = []
+  }
 
-    const spawnedState = dup(initialState)
-    spawnedState.piece = spawnedState.next.shift() || null
-    spawnedState.position = [4, 21]
-    spawnedState.rotation = ROTATION.NORTH
-    if (checkConflict(spawnedState)) throw new Error('gameover')
-    states.push(spawnedState)
+  private add(state: TetrisState): void {
+    this.states.push(new TetrisState(state.operation, dup(state)))
+  }
 
-    for (const operation of data.operations) {
-      if (operation.hold) states.push(holdPiece(lastState()))
-      for (const op of operation.ops)
-        states.push(...proceedWithOperations(lastState(), op))
-      states.push(...lockPiece(lastState()))
+  public generate(data: Compiled) {
+    try {
+      const initialState = TetrisState.initFromCompiled(data)
+      // this.add(initialState) // skipping this makes loop smoother
+      this.add(initialState.spawn())
+
+      for (const operation of data.operations) {
+        const allOperations = [
+          ...operation.hold ? [HOLD] : [],
+          ...operation.ops,
+          LOCK,
+        ]
+        for (const op of allOperations) {
+          const newStates = this.currentState.handleOperation(op)
+          newStates.forEach(s => this.add(s))
+        }
+      }
+    } catch(error) {
+      if (error instanceof TetrisGameOver) {
+        this.add(error.state)
+        console.warn('Game Over:', error.state)
+      } else if (error instanceof TetrisOperationError) {
+        this.add(error.state)
+        console.warn('Operation Error:', error.state, error.message)
+      } else
+        console.error('Unexpected error during Tetris session generation:', error)
     }
-  } catch(error) {
-    console.error(error)
+
+    console.log(this.states.length, 'states generated')
+    this.generated = true
   }
 
-  console.log(states.length, 'states generated')
-  return states
+  public get currentState(): TetrisState {
+    return this.states[this.states.length - 1]
+  }
 }
 
-const createInitialState = (data: Compiled): TetrisState => ({
-  grid: boardToGrid(data.board),
-  piece: null,
-  position: [4, 21] as Position,
-  rotation: ROTATION.NORTH,
-  hold: data.order?.holding || null,
-  canHold: true,
-  next: data.order?.next || data.operations.map(op => op.piece).filter(Boolean) as PIECE[],
-  key: null,
-  keyUp: true,
-})
+export class TetrisGameOver extends Error {
+  state: TetrisState
 
-const dup = (state: TetrisState): TetrisState => {
-  const newState: TetrisState = {
-    ...state,
-    key: state.keyUp ? null : state.key,
-    clearingLines: [],
+  constructor(state: TetrisState) {
+    super('Game Over')
+    Object.setPrototypeOf(this, TetrisGameOver.prototype)
+    this.state = state
   }
-  return JSON.parse(JSON.stringify(newState)) as TetrisState
 }
 
-const checkConflict = (state: TetrisState): boolean =>
-  !!state.piece && !getPiecePositions(state.piece, state.rotation, ...state.position)
-    .every(([x, y]) => isFillable(state.grid, x, y))
+export class TetrisOperationError extends Error {
+  state: TetrisState
 
-const proceedWithOperations = (
-  state: TetrisState,
-  operation: MOVES | ROTATES,
-): TetrisState[] => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  if (MOVES.includes(operation as any))
-    return movePiece(state, operation as MOVE)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  else if (ROTATES.includes(operation as any))
-    return [rotatePiece(state, operation as ROTATE)]
-  else throw new Error(`Unknown operation: ${operation}`)
+  constructor(state: TetrisState, message = 'unknown') {
+    super(`Operation Error: ${message}`)
+    Object.setPrototypeOf(this, TetrisOperationError.prototype)
+    this.state = state
+  }
 }
 
-const stepPiece = (
-  oldState: TetrisState,
-  move: MOVE.LEFT | MOVE.RIGHT | MOVE.FALL,
-): TetrisState | null => {
-  const state = dup(oldState)
-  switch (move) {
-    case MOVE.LEFT: state.position[0]--; break
-    case MOVE.RIGHT: state.position[0]++; break
-    case MOVE.FALL: state.position[1]--; break
+export class TetrisState implements TetrisStateData {
+  public readonly grid: Grid
+  public readonly piece: PIECE | null
+  public readonly position: Position
+  public readonly rotation: ROTATION
+  public readonly hold: PIECE | null
+  public readonly canHold: boolean
+  public readonly next: PIECE[]
+  public readonly key: KEY | null
+  public readonly keyUp: boolean
+  public readonly clearingLines?: number[]
+  public readonly operation: MOVES | ROTATES | LOCK | HOLD | 'spawn' | 'clearing' | 'init'
+
+  constructor(
+    operation: MOVES | ROTATES | LOCK | HOLD | 'spawn' | 'clearing' | 'init',
+    data: Omit<TetrisStateData, 'operation'>,
+  ) {
+    const {
+      grid,
+      piece,
+      position,
+      rotation,
+      hold,
+      canHold,
+      next,
+      key,
+      keyUp,
+      clearingLines,
+    } = data
+    const newData: TetrisStateData = {
+      grid: dup(grid),
+      piece,
+      position: dup(position),
+      rotation,
+      hold,
+      canHold,
+      next: dup(next),
+      key,
+      keyUp,
+      clearingLines: dup(operation === 'clearing' ? clearingLines || [] : []),
+      operation,
+    }
+    this.grid = newData.grid
+    this.piece = newData.piece
+    this.position = newData.position
+    this.rotation = newData.rotation
+    this.hold = newData.hold
+    this.canHold = newData.canHold
+    this.next = newData.next
+    this.key = newData.key
+    this.keyUp = newData.keyUp
+    this.clearingLines = newData.clearingLines
+    this.operation = newData.operation
   }
-  return checkConflict(state) ? null : state
-}
 
-const movePiece = (
-  oldState: TetrisState,
-  move: MOVE | LOCK,
-): TetrisState[] => {
-  const state = dup(oldState)
-
-  switch (move) {
-    case MOVE.LEFT: state.key = KEY.LEFT; break
-    case MOVE.RIGHT: state.key = KEY.RIGHT; break
-    case MOVE.FALL: state.key = KEY.DOWN; break
-    case MOVE.LEFTSIDE: state.key = KEY.LEFT; break
-    case MOVE.RIGHTSIDE: state.key = KEY.RIGHT; break
-    case MOVE.SOFTDROP: state.key = KEY.DOWN; break
-    case LOCK: state.key = KEY.SPACE; break
-  }
-  if (!state.piece) {
-    state.keyUp = true
-    return [state]
+  public static initFromCompiled(data: Compiled): TetrisState {
+    return new TetrisState('init', {
+      grid: boardToGrid(data.board),
+      piece: null,
+      position: [4, 21] as Position,
+      rotation: ROTATION.NORTH,
+      hold: data.order?.holding || null,
+      canHold: true,
+      next: data.order?.next || data.operations.map(op => op.piece).filter(Boolean) as PIECE[],
+      key: null,
+      keyUp: true,
+      clearingLines: [],
+    })
   }
 
-  if ([MOVE.LEFT, MOVE.RIGHT, MOVE.FALL].includes(move as MOVE)) {
-    const newState = stepPiece(state, move as MOVE.LEFT | MOVE.RIGHT | MOVE.FALL)
-    const releaseState = newState || state
-    releaseState.keyUp = true
-    return [releaseState]
+  public handleOperation(op: MOVES | ROTATES | LOCK | HOLD): TetrisState[] {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const operation = op as any
+    if ([MOVE.LEFTSIDE, MOVE.RIGHTSIDE, MOVE.SOFTDROP].includes(operation))
+      return this.movePiece(operation)
+    else if ([MOVE.LEFT, MOVE.RIGHT, MOVE.FALL].includes(operation))
+      return [this.stepPiece(operation)]
+    else if (ROTATES.includes(operation))
+      return [this.rotatePiece(operation)]
+    else if (operation === LOCK)
+      return this.lockPiece()
+    else if (operation === HOLD)
+      return [this.holdPiece()]
+    else throw new Error(`Unknown operation: ${op}`)
+  }
 
-  } else {
-    state.keyUp = false
-    let curState: TetrisState | null = dup(state)
-    let lastState: TetrisState = curState
+  public conflict(): boolean {
+    return !!this.piece && !getPiecePositions(this.piece, this.rotation, ...this.position)
+      .every(([x, y]) => isFillable(this.grid, x, y))
+  }
+
+  public stepPiece(move: MOVE.LEFT | MOVE.RIGHT | MOVE.FALL | LOCK): TetrisState {
+    const key = {
+      [MOVE.LEFT]: KEY.LEFT,
+      [MOVE.RIGHT]: KEY.RIGHT,
+      [MOVE.FALL]: KEY.DOWN,
+      [LOCK]: KEY.SPACE,
+    }[move]
+    if (!this.piece) return new TetrisState(move, { ...this, key, keyUp: true })
+
+    const position = dup(this.position)
+    ;({
+      [MOVE.LEFT]: () => position[0]--,
+      [MOVE.RIGHT]: () => position[0]++,
+      [MOVE.FALL]: () => position[1]--,
+      [LOCK]: () => position[1]--,
+    })[move]()
+    const newState = new TetrisState(move, { ...this, key, keyUp: false, position })
+    if (newState.conflict())
+      return new TetrisState(move, { ...this, key, keyUp: true })
+    return newState
+  }
+
+  public movePiece(move: MOVE.LEFTSIDE | MOVE.RIGHTSIDE | MOVE.SOFTDROP | LOCK): TetrisState[] {
     const states = [] as TetrisState[]
-    switch (move) {
-      case MOVE.LEFTSIDE:
-        while (curState) {
-          states.push(curState)
-          curState = stepPiece(curState, MOVE.LEFT)
-          lastState = curState || lastState
-        }
-        break
-      case MOVE.RIGHTSIDE:
-        while (curState) {
-          states.push(curState)
-          curState = stepPiece(curState, MOVE.RIGHT)
-          lastState = curState || lastState
-        }
-        break
-      case MOVE.SOFTDROP:
-        while (curState) {
-          states.push(curState)
-          curState = stepPiece(curState, MOVE.FALL)
-          lastState = curState || lastState
-        }
-        break
-      case LOCK:
-        while (curState) {
-          curState = stepPiece(curState, MOVE.FALL)
-          lastState = curState || lastState
-        }
-        break
+    let lastState: TetrisState | null = null
+    let end = false
+    const op = ({
+      [MOVE.LEFTSIDE]: MOVE.LEFT,
+      [MOVE.RIGHTSIDE]: MOVE.RIGHT,
+      [MOVE.SOFTDROP]: MOVE.FALL,
+      [LOCK]: LOCK,
+    } as const)[move]
+    while (!end) {
+      const oldState: TetrisState = lastState || this
+      const newState = oldState.stepPiece(op)
+      if (newState.keyUp || op !== LOCK) states.push(newState)
+      lastState = newState
+      end = newState.keyUp
     }
-    const releaseState = dup(lastState || state)
-    releaseState.keyUp = true
-    states.push(releaseState)
-    // return states
-    return [releaseState]
-  }
-}
-
-const rotatePiece = (oldState: TetrisState, rotation: ROTATE): TetrisState => {
-  const state = dup(oldState)
-  state.keyUp = true
-  switch (rotation) {
-    case ROTATE.CLOCKWISE: state.key = KEY.UP; break
-    case ROTATE.FLIP: state.key = KEY.A; break
-    case ROTATE.COUNTERCLOCKWISE: state.key = KEY.Z; break
+    return states
   }
 
-  if (!state.piece || rotation === ROTATE.NOOP) return state
+  public rotatePiece(rotation: ROTATE): TetrisState {
+    const key = {
+      [ROTATE.NOOP]: null,
+      [ROTATE.CLOCKWISE]: KEY.UP,
+      [ROTATE.FLIP]: KEY.A,
+      [ROTATE.COUNTERCLOCKWISE]: KEY.Z,
+    }[rotation]
 
-  const toRotation = getNextRotation(state.rotation, rotation)
-  const newPosition = kickTest(
-    state.grid,
-    state.piece,
-    state.position,
-    state.rotation,
-    toRotation,
-  )
-  if (!newPosition) return state
+    if (!this.piece || rotation === ROTATE.NOOP || !key)
+      return new TetrisState(rotation, { ...this, key, keyUp: true })
 
-  state.position = newPosition
-  state.rotation = toRotation
-  return state
-}
+    const toRotation = getNextRotation(this.rotation, rotation)
+    const position = kickTest(
+      this.grid,
+      this.piece,
+      this.position,
+      this.rotation,
+      toRotation,
+    )
+    if (!position) return new TetrisState(rotation, { ...this, key, keyUp: true })
+    return new TetrisState(rotation, { ...this, position, rotation: toRotation, key, keyUp: true })
+  }
 
-const holdPiece = (oldState: TetrisState): TetrisState => {
-  const state = dup(oldState)
-  state.key = KEY.SHIFT
-  state.keyUp = true
+  public holdPiece(): TetrisState {
+    const key = KEY.SHIFT
+    const keyUp = true
 
-  if (!state.canHold || !state.piece || (!state.hold && !state.next[0])) return state
+    if (!this.canHold || !this.piece || (!this.hold && !this.next[0]))
+      return new TetrisState(HOLD, { ...this, key, keyUp })
 
-  const heldPiece = state.hold || state.next.shift() as PIECE
-  state.hold = state.piece
-  state.piece = heldPiece
-  state.canHold = false
-  state.position = [4, 21]
-  state.rotation = ROTATION.NORTH
-  if (checkConflict(state)) throw new Error('gameover')
-  return state
-}
+    const newState = new TetrisState(HOLD, {
+      ...this,
+      piece: this.hold || this.next[0] as PIECE,
+      hold: this.piece,
+      canHold: false,
+      position: [4, 21],
+      rotation: ROTATION.NORTH,
+      key,
+      keyUp,
+    })
+    if (newState.conflict()) throw new TetrisGameOver(newState)
+    return newState
+  }
 
-const lockPiece = (oldState: TetrisState): TetrisState[] => {
-  const state = dup(oldState)
-  state.key = KEY.SPACE
-  state.keyUp = true
+  public spawn(newGrid?: Grid): TetrisState {
+    const spawnState = new TetrisState('spawn', {
+      ...this,
+      grid: newGrid || dup(this.grid),
+      piece: this.next[0] || null,
+      next: this.next.slice(1),
+      position: [4, 21] as Position,
+      rotation: ROTATION.NORTH,
+      canHold: true,
+      clearingLines: [],
+    })
+    if (spawnState.conflict()) throw new TetrisGameOver(spawnState)
+    return spawnState
+  }
 
-  const movedState = movePiece(state, LOCK)
-  const lastState = movedState[movedState.length - 1] || state
-  if (!lastState.piece) return [lastState]
+  public lockPiece(): TetrisState[] {
+    const lockStates = this.movePiece(LOCK)
+    const state = lockStates[lockStates.length - 1] || this
+    if (!state.piece) throw new TetrisOperationError(state, 'No piece to lock')
 
-  const positions = getPiecePositions(
-    lastState.piece,
-    lastState.rotation,
-    ...lastState.position,
-  )
+    const newGrid = dup(state.grid)
+    const positions = getPiecePositions(
+      state.piece,
+      state.rotation,
+      ...state.position,
+    )
+    positions.forEach(([x, y]) => {
+      if (y < 0 || y >= state.grid.length || x < 0 || x >= state.grid[0].length) return
+      newGrid[y][x] = state.piece
+    })
 
-  positions.forEach(([x, y]) => {
-    if (y < 0 || y >= lastState.grid.length || x < 0 || x >= lastState.grid[0].length) return
-    lastState.grid[y][x] = lastState.piece
-  })
+    const { grid: clearedGrid, clearedLines: clearingLines } = clearLines(newGrid)
+    const lockedState = new TetrisState('clearing', {
+      ...state,
+      clearingLines,
+      grid: newGrid,
+      piece: null,
+    })
 
-  lastState.piece = null
-  const { grid: clearedGrid, clearedLines } = clearLines(lastState.grid)
-  lastState.clearingLines = clearedLines
-  const lockedState = dup(lastState)
-
-  lastState.grid = clearedGrid
-  lastState.canHold = true
-
-  lastState.piece = lastState.next.shift() || null
-  lastState.position = [4, 21]
-  lastState.rotation = ROTATION.NORTH
-  if (checkConflict(lastState)) throw new Error('gameover')
-  return [lockedState, lastState]
+    return [...lockStates, lockedState, lockedState.spawn(clearedGrid)]
+  }
 }

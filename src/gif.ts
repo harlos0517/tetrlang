@@ -1,4 +1,4 @@
-import { generateStates } from '@/tetris'
+import { TetrisSession } from '@/tetris'
 import sharp, { GifOptions } from 'sharp'
 import { createFrame } from './renderer'
 import { Compiled } from './types'
@@ -13,8 +13,9 @@ export const generateGif = async(
   options: GifOptions = defaultGifOptions,
   outputPath?: string,
 ) => {
-  const states = generateStates(compiled)
-  const frames = await Promise.all(states.map(async state => {
+  const session = new TetrisSession(compiled)
+  session.generate(compiled)
+  const frames = await Promise.all(session.states.map(async state => {
     const { canvas } = createFrame(state)
     return canvas.toBuffer('image/png')
   }))
