@@ -5,8 +5,10 @@ import { getPiecePositions } from './srs'
 import { GARBAGE, PIECE, Position, ROTATION } from './types'
 
 export const CELL_SIZE = 32
-export const CELL_BORDER = 4
+export const CELL_BORDER = 1
 export const GRID_GAP = CELL_BORDER * 2
+export const LINE_WIDTH = 4
+export const BOARD_PADDING = 0 // Padding inset of the board
 export const PADDING = {
   TOP: 4,
   BOTTOM: 2,
@@ -51,16 +53,16 @@ export const createFrame = (state: TetrisState) => {
   return { canvas, ctx }
 }
 
-const p = (x: number, y: number): [number, number] => ([
-  x * CELL_SIZE + PADDING.LEFT * CELL_SIZE + CELL_BORDER,
-  CANVAS_SIZE.HEIGHT - y * CELL_SIZE - PADDING.BOTTOM * CELL_SIZE - CELL_BORDER,
+const p = (x: number, y: number, offsetX = 0, offsetY = 0): [number, number] => ([
+  x * CELL_SIZE + PADDING.LEFT * CELL_SIZE + offsetX,
+  CANVAS_SIZE.HEIGHT - y * CELL_SIZE - PADDING.BOTTOM * CELL_SIZE - offsetY,
 ])
 
 const r = (x: number, y: number): [number, number, number, number] => ([
   x * CELL_SIZE + PADDING.LEFT * CELL_SIZE + CELL_BORDER,
   CANVAS_SIZE.HEIGHT - y * CELL_SIZE - PADDING.BOTTOM * CELL_SIZE - CELL_BORDER,
-  CELL_SIZE - CELL_BORDER,
-  -CELL_SIZE + CELL_BORDER,
+  CELL_SIZE - GRID_GAP,
+  -CELL_SIZE + GRID_GAP,
 ])
 
 const createRenderer = (): { canvas: Canvas, ctx: CTX } => {
@@ -75,26 +77,26 @@ const init = (ctx: CTX): void => {
   ctx.fillStyle = '#000000'
   ctx.fillRect(0, 0, CANVAS_SIZE.WIDTH, CANVAS_SIZE.HEIGHT)
 
-  // Draw grid border
-  ctx.strokeStyle = '#A0A0A0'
-  ctx.lineWidth = 1
-  ctx.beginPath()
-  ctx.moveTo(...p(0, 0))
-  ctx.lineTo(...p(GRID_WIDTH, 0))
-  ctx.lineTo(...p(GRID_WIDTH, DISPLAY_HEIGHT))
-  ctx.lineTo(...p(0, DISPLAY_HEIGHT))
-  ctx.lineTo(...p(0, 0))
-  ctx.closePath()
-  ctx.stroke()
-
   // Draw checkered background
   for (let y = 0; y < DISPLAY_HEIGHT; y++) {
     for (let x = 0; x < GRID_WIDTH; x++) {
-      if ((x + y) % 2 === 0) ctx.fillStyle = '#1A1A1A'
-      else ctx.fillStyle = '#2A2A2A'
+      if ((x + y) % 2 === 0) ctx.fillStyle = '#111111'
+      else ctx.fillStyle = '#222222'
       ctx.fillRect(...r(x, y))
     }
   }
+
+  // Draw grid border
+  ctx.strokeStyle = '#FFFFFF'
+  ctx.lineWidth = LINE_WIDTH
+  const offset = LINE_WIDTH / 2 - CELL_BORDER + BOARD_PADDING
+  ctx.beginPath()
+  ctx.moveTo(...p(0, DISPLAY_HEIGHT, -offset, -CELL_BORDER))
+  ctx.lineTo(...p(0, 0, -offset, -offset))
+  ctx.lineTo(...p(GRID_WIDTH, 0, offset, -offset))
+  ctx.lineTo(...p(GRID_WIDTH, DISPLAY_HEIGHT, offset, -CELL_BORDER))
+  ctx.stroke()
+
 }
 
 const renderGrid = (ctx: CTX, grid: Cell[][]): void => {
