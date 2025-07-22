@@ -44,6 +44,9 @@ export const createFrame = (state: TetrisState) => {
   // Render current piece
   if (state.piece) renderCurrentPiece(ctx, state)
 
+  // render clearing lines
+  if (state.clearingLines) renderClearingLines(ctx, state.clearingLines)
+
   // Render hold piece
   if (state.hold) renderHoldPiece(ctx, state.hold, state.canHold)
 
@@ -62,6 +65,13 @@ const r = (x: number, y: number): [number, number, number, number] => ([
   x * CELL_SIZE + PADDING.LEFT * CELL_SIZE + CELL_BORDER,
   CANVAS_SIZE.HEIGHT - y * CELL_SIZE - PADDING.BOTTOM * CELL_SIZE - CELL_BORDER,
   CELL_SIZE - GRID_GAP,
+  -CELL_SIZE + GRID_GAP,
+])
+
+const l = (y: number): [number, number, number, number] => ([
+  0 * CELL_SIZE + PADDING.LEFT * CELL_SIZE + CELL_BORDER,
+  CANVAS_SIZE.HEIGHT - y * CELL_SIZE - PADDING.BOTTOM * CELL_SIZE - CELL_BORDER,
+  CELL_SIZE * 10 - GRID_GAP,
   -CELL_SIZE + GRID_GAP,
 ])
 
@@ -123,6 +133,11 @@ const renderCurrentPiece = (ctx: CTX, state: TetrisState): void => {
     ctx.fillStyle = PIECE_COLORS[state.piece]
     ctx.fillRect(...r(x, y))
   }
+}
+
+const renderClearingLines = (ctx: CTX, clearingLines: number[]): void => {
+  ctx.fillStyle = '#FFFFFF'
+  for (const line of clearingLines) ctx.fillRect(...l(line))
 }
 
 const renderHoldPiece = (ctx: CTX, holdPiece: PIECE | null, canHold = true): void => {

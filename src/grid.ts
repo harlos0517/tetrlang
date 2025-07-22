@@ -31,17 +31,17 @@ export const copyGrid = (grid: Grid): Grid => grid.map(row => [...row])
 export const isFillable = (grid: Grid, x: number, y: number): boolean =>
   x >= 0 && x < GRID_WIDTH && y >= 0 && y < GRID_HEIGHT && grid[y][x] === null
 
-export const clearLines = (grid: Grid): { grid: Grid, linesCleared: number } => {
+export const clearLines = (grid: Grid): { grid: Grid, clearedLines: number[] } => {
   const newGrid: Grid = []
-  let linesCleared = 0
+  const clearedLines: number[] = []
 
-  for (const row of grid) {
-    if (row.every(cell => cell !== null)) linesCleared++
+  for (const [index, row] of grid.entries()) {
+    if (row.every(cell => cell !== null)) clearedLines.push(index)
     else newGrid.push([...row])
   }
 
   while (newGrid.length < GRID_HEIGHT)
     newGrid.push(Array(GRID_WIDTH).fill(null))
 
-  return { grid: newGrid, linesCleared }
+  return { grid: newGrid, clearedLines }
 }

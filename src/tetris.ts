@@ -23,6 +23,7 @@ export interface TetrisState {
   next: PIECE[]
   key: KEY | null
   keyUp: boolean
+  clearingLines?: number[]
 }
 
 export const generateStates = (data: Compiled): TetrisState[] => {
@@ -70,6 +71,7 @@ const dup = (state: TetrisState): TetrisState => {
   const newState: TetrisState = {
     ...state,
     key: state.keyUp ? null : state.key,
+    clearingLines: [],
   }
   return JSON.parse(JSON.stringify(newState)) as TetrisState
 }
@@ -234,9 +236,12 @@ const lockPiece = (oldState: TetrisState): TetrisState[] => {
     if (y < 0 || y >= lastState.grid.length || x < 0 || x >= lastState.grid[0].length) return
     lastState.grid[y][x] = lastState.piece
   })
+
+  lastState.piece = null
+  const { grid: clearedGrid, clearedLines } = clearLines(lastState.grid)
+  lastState.clearingLines = clearedLines
   const lockedState = dup(lastState)
 
-  const { grid: clearedGrid } = clearLines(lastState.grid)
   lastState.grid = clearedGrid
   lastState.canHold = true
 

@@ -55,11 +55,11 @@ tetrio_operations = board (order start op_with_order* | start op_no_order*)
 ```
 
 # todo
-- clear line visualization
-- ghost piece visualization
-- add key handling visualization
-- adjust format to allow omitting some parameters
-- aesthetics redesign
-- dynamic delay for different operations
-- settings preset
-- spin indicator
+- [x] clear line visualization
+- [ ] ghost piece visualization
+- [ ] add key handling visualization
+- [ ] adjust format to allow omitting some parameters
+- [ ] aesthetics redesign
+- [ ] dynamic delay for different operations
+- [ ] settings preset
+- [ ] spin indicator
