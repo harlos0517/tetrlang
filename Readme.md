@@ -60,6 +60,6 @@ tetrio_operations = board (order start op_with_order* | start op_no_order*)
 - [ ] add key handling visualization
 - [ ] adjust format to allow omitting some parameters
 - [ ] aesthetics redesign
-- [ ] dynamic delay for different operations
+- [x] dynamic delay for different operations
 - [ ] settings preset
 - [ ] spin indicator

@@ -23,10 +23,7 @@ program.command('gen')
   .option('-d, --delay <ms>', 'frame delay in milliseconds', '500')
   .action(async(str, options) => {
     const compiled = compiler(str)
-    const gifOptions = {
-      delay: parseInt(options.delay, 10),
-      loop: 0,
-    }
+    const gifOptions = { delay: parseInt(options.delay, 10) }
     await generateGif(compiled, gifOptions, options.output)
     console.log(`GIF generated at ${options.output}`)
   })

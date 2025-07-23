@@ -192,17 +192,32 @@ export class TetrisState implements TetrisStateData {
       .every(([x, y]) => isFillable(this.grid, x, y))
   }
 
-  public stepPiece(move: MOVE.LEFT | MOVE.RIGHT | MOVE.FALL | LOCK): TetrisState {
+  public stepPiece(move: MOVE | LOCK): TetrisState {
     const key = {
+      [MOVE.LEFTSIDE]: KEY.LEFT,
+      [MOVE.RIGHTSIDE]: KEY.RIGHT,
+      [MOVE.SOFTDROP]: KEY.DOWN,
       [MOVE.LEFT]: KEY.LEFT,
       [MOVE.RIGHT]: KEY.RIGHT,
       [MOVE.FALL]: KEY.DOWN,
       [LOCK]: KEY.SPACE,
     }[move]
-    if (!this.piece) return new TetrisState(move, { ...this, key, keyUp: true })
+    const op = {
+      [MOVE.LEFTSIDE]: MOVE.LEFT,
+      [MOVE.RIGHTSIDE]: MOVE.RIGHT,
+      [MOVE.SOFTDROP]: MOVE.FALL,
+      [MOVE.LEFT]: MOVE.LEFT,
+      [MOVE.RIGHT]: MOVE.RIGHT,
+      [MOVE.FALL]: MOVE.FALL,
+      [LOCK]: LOCK,
+    }[move]
+    if (!this.piece) return new TetrisState(op, { ...this, key, keyUp: true })
 
     const position = dup(this.position)
     ;({
+      [MOVE.LEFTSIDE]: () => position[0]--,
+      [MOVE.RIGHTSIDE]: () => position[0]++,
+      [MOVE.SOFTDROP]: () => position[1]--,
       [MOVE.LEFT]: () => position[0]--,
       [MOVE.RIGHT]: () => position[0]++,
       [MOVE.FALL]: () => position[1]--,
@@ -210,7 +225,7 @@ export class TetrisState implements TetrisStateData {
     })[move]()
     const newState = new TetrisState(move, { ...this, key, keyUp: false, position })
     if (newState.conflict())
-      return new TetrisState(move, { ...this, key, keyUp: true })
+      return new TetrisState(op, { ...this, key, keyUp: true })
     return newState
   }
 
@@ -218,16 +233,10 @@ export class TetrisState implements TetrisStateData {
     const states = [] as TetrisState[]
     let lastState: TetrisState | null = null
     let end = false
-    const op = ({
-      [MOVE.LEFTSIDE]: MOVE.LEFT,
-      [MOVE.RIGHTSIDE]: MOVE.RIGHT,
-      [MOVE.SOFTDROP]: MOVE.FALL,
-      [LOCK]: LOCK,
-    } as const)[move]
     while (!end) {
       const oldState: TetrisState = lastState || this
-      const newState = oldState.stepPiece(op)
-      if (newState.keyUp || op !== LOCK) states.push(newState)
+      const newState = oldState.stepPiece(move)
+      if (newState.keyUp || move !== LOCK) states.push(newState)
       lastState = newState
       end = newState.keyUp
     }
