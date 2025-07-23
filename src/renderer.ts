@@ -41,8 +41,12 @@ export const createFrame = (state: TetrisState) => {
   // Render board
   renderGrid(ctx, state.grid)
 
+  // Render ghost piece
+  if (state.piece) renderGhostPiece(ctx, state)
+
   // Render current piece
   if (state.piece) renderCurrentPiece(ctx, state)
+
 
   // render clearing lines
   if (state.clearingLines) renderClearingLines(ctx, state.clearingLines)
@@ -131,6 +135,23 @@ const renderCurrentPiece = (ctx: CTX, state: TetrisState): void => {
 
   for (const [x, y] of positions) {
     ctx.fillStyle = PIECE_COLORS[state.piece]
+    ctx.fillRect(...r(x, y))
+  }
+}
+
+const renderGhostPiece = (ctx: CTX, state: TetrisState): void => {
+  if (!state.piece) return
+  const ghostPosition = state.ghostPiecePosition
+  if (!ghostPosition) return
+
+  const positions = getPiecePositions(
+    state.piece,
+    state.rotation,
+    ...ghostPosition,
+  )
+
+  for (const [x, y] of positions) {
+    ctx.fillStyle = `${PIECE_COLORS[state.piece]}40`
     ctx.fillRect(...r(x, y))
   }
 }

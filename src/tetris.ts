@@ -293,6 +293,13 @@ export class TetrisState implements TetrisStateData {
     return spawnState
   }
 
+  public get ghostPiecePosition(): Position | null {
+    if (!this.piece) return null
+    const lockStates = this.movePiece(LOCK)
+    const state = lockStates[lockStates.length - 1] || this
+    return state.position
+  }
+
   public lockPiece(): TetrisState[] {
     const lockStates = this.movePiece(LOCK)
     const state = lockStates[lockStates.length - 1] || this
