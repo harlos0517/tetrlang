@@ -19,17 +19,17 @@
 # example
 - no order provided
 ```
-2,,,,-1,-2,,,-3,:Jr[_Tr[_S[r+r_Z[+r_
+2,,,,-1,-2,,,-3::Jr[;Tr[;S[r_r;Z[_r;
 ```
 
 - order provided
 ```
-2,,,,-1,-2,,,-3,S/JTLZ:r[_r[_/[r+r_[+r_
+2,,,,-1,-2,,,-3:S|JTLZ:r[;r[;|[r_r;[_r;
 ```
 
 - PCO
 ```
-I/TSZILJOTSZ:r[_+[_[_]_r>>_c]_]<_c>__c+c<_
+:I|TSZILJOTSZ:r[;_[;[;];r>>;z];]<;z>;;z_z<;
 ```
 
 ## spec
@@ -38,27 +38,28 @@ col = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
 connector = '-'
 row_sep = ','
 hold = '/'
-start = ':'
+sep = ':'
 piece = 'I' | 'J' | 'L' | 'O' | 'S' | 'Z' | 'T'
-rotate = 'x' | 'r' | 'a' | 'c'
-move = '[' | '<' | '>' | ']' | '.' | '+'
-lock = '_'
+rotate = 'o' | 'r' | 'a' | 'z'
+move = '[' | '<' | '>' | ']' | '.' | '_'
+lock = ';'
 range = col connector col
 range_begin = connector col
 range_end = col connector
-row = range_begin? (range | col)* range_end?
-board = (row row_sep)*
+all_col = connector
+row = (range | col)+ | (range_begin (range | col)*) | ((range | col)* range_end) | all_col
+board = row (row_sep row?)*
 order = piece hold piece+
 op_with_order = hold? move* lock
 op_no_order = piece move* lock
-tetrio_operations = board (order start op_with_order* | start op_no_order*)
+tetrio_operations = board? sep (order sep op_with_order* | sep op_no_order*)
 ```
 
 # todo
 - [x] clear line visualization
 - [x] ghost piece visualization
 - [ ] add key handling visualization
-- [ ] adjust format to allow omitting some parameters
+- [x] adjust format to allow omitting some parameters
 - [ ] aesthetics redesign
 - [x] dynamic delay for different operations
 - [ ] settings preset

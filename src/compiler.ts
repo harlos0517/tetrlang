@@ -4,13 +4,12 @@ import {
   LOCK,
   MOVES,
   Operation,
-  Order,
   PIECE,
   PIECES,
   ROTATES,
   Row,
   ROW_SEPARATOR,
-  START,
+  SEPARATOR,
 } from './types'
 
 const parseRow = (row: string): Row | null => {
@@ -82,42 +81,51 @@ const parseOperations = <HasOrder extends boolean>(
 }
 
 export default (input: string): Compiled => {
-  const [context, operations] = input.split(START)
-  if (context === undefined || operations === undefined)
+  const [context, orderString, opString] = input.split(SEPARATOR)
+  if (context === undefined || opString === undefined || orderString === undefined)
     throw new Error(`Invalid input: ${input}`)
-  const rows = context.split(ROW_SEPARATOR)
-  const order = rows.pop()
 
-  const rowResults: Row[] = []
+  const rows = context.split(ROW_SEPARATOR)
+  const board: Row[] = []
   let prevRow: Row | null = null
   for (const row of rows) {
     const parsedRow = parseRow(row)
     if (!parsedRow) {
       if (!prevRow) throw new Error('First row cannot be empty')
-      else rowResults.push([...prevRow])
+      else board.push([...prevRow])
     } else {
-      rowResults.push(parsedRow)
+      board.push(parsedRow)
       prevRow = [...parsedRow]
     }
   }
 
-  const orderResult: Order | null = order ? {
-    holding: order.split(HOLD)[0] as PIECE,
-    next: order.split(HOLD)[1].split('') as PIECE[],
-  } : null
+  const slicedOperations = opString.endsWith(LOCK) ? opString.slice(0, -1) : opString
+  const operations = parseOperations(slicedOperations, !!orderString)
 
-  if (orderResult &&
-    [orderResult.holding, ...orderResult.next].some(piece => !PIECES.includes(piece))
-  ) throw new Error(`Invalid order: ${order}`)
+  const orderParts = orderString.split(HOLD)
+  const [holding, nextString] = orderParts.length === 2 ? orderParts
+    : orderParts.length === 1 ? ['', orderParts[0]] :
+      orderParts.length === 0 ? ['', '']
+        : (() => { throw new Error(`Invalid order: ${orderString}`) })()
 
-  const slicedOperations = operations.endsWith(LOCK) ? operations.slice(0, -1) : operations
-  const operationsResult = orderResult
-    ? parseOperations(slicedOperations, true)
-    : parseOperations(slicedOperations, false)
+  if (holding.length > 1 || (holding && !PIECES.includes(holding as PIECE)))
+    throw new Error(`Invalid holding piece: ${holding}`)
+  if (nextString.length < operations.length)
+    // eslint-disable-next-line @stylistic/max-len
+    throw new Error(`Next pieces count (${nextString.length}) must >= operations count (${operations.length})`)
+
+  const next = nextString.split('')
+  if (next.some(n => !PIECES.includes(n as PIECE)))
+    throw new Error(`Invalid next: ${nextString}`)
+
+  const order = {
+    holding: holding as PIECE,
+    next: next as PIECE[],
+  }
 
   return {
-    board: rowResults,
-    order: orderResult,
-    operations: operationsResult,
+    board,
+    order,
+    operations,
   }
 }

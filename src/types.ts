@@ -1,20 +1,19 @@
 /* eslint-disable no-unused-vars */
 
 export type Position = [number, number]
-export type Shape = Record<ROTATIONS, Position[]>
-export type KickTable = Record<ROTATIONS, Record<ROTATIONS, Position[]>>
+export type Shape = Record<ROTATES, Position[]>
+export type KickTable = Record<ROTATES, Record<ROTATES, Position[]>>
 
 export type COL = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
 export type CONNECTOR = '-'
 export type ROW_SEPARATOR = ','
-export type HOLD = '/'
-export type START = ':'
+export type HOLD = '|'
+export type SEPARATOR = ':'
 export type PIECES = 'I' | 'J' | 'L' | 'O' | 'S' | 'Z' | 'T'
 export type GARBAGE = 'G'
-export type ROTATES = 'x' | 'r' | 'a' | 'c'
-export type ROTATIONS = 'X' | 'R' | 'A' | 'C'
-export type MOVES = '[' | '<' | '>' | ']' | '.' | '+'
-export type LOCK = '_'
+export type ROTATES = 'o' | 'r' | 'a' | 'z'
+export type MOVES = '[' | '<' | '>' | ']' | '.' | '_'
+export type LOCK = ';'
 export type KEYS =
   | 'ArrowLeft' | 'ArrowRight' | 'ArrowDown' | 'ArrowUp'
   | 'Space' | 'Shift' | 'KeyZ' | 'KeyX'
@@ -22,8 +21,8 @@ export type KEYS =
 export const COLS: COL[] = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 export const CONNECTOR: CONNECTOR = '-'
 export const ROW_SEPARATOR: ROW_SEPARATOR = ','
-export const HOLD: HOLD = '/'
-export const START: START = ':'
+export const HOLD: HOLD = '|'
+export const SEPARATOR: SEPARATOR = ':'
 export const PIECES: PIECES[] = ['I', 'J', 'L', 'O', 'S', 'Z', 'T']
 export enum PIECE {
   I = 'I',
@@ -35,30 +34,29 @@ export enum PIECE {
   T = 'T',
 }
 export const GARBAGE: GARBAGE = 'G'
-export const ROTATES: ROTATES[] = ['x', 'r', 'a', 'c']
+export const ROTATES: ROTATES[] = ['o', 'r', 'a', 'z']
 export enum ROTATE {
-  NOOP = 'x',
+  NOOP = 'o',
   CLOCKWISE = 'r',
   FLIP = 'a',
-  COUNTERCLOCKWISE = 'c',
+  COUNTERCLOCKWISE = 'z',
 }
-export const ROTATIONS: ROTATIONS[] = ['X', 'R', 'A', 'C']
 export enum ROTATION {
-  NORTH = 'X',
-  EAST = 'R',
-  SOUTH = 'A',
-  WEST = 'C',
+  NORTH = 'o',
+  EAST = 'r',
+  SOUTH = 'a',
+  WEST = 'z',
 }
-export const MOVES: MOVES[] = ['[', '<', '>', ']', '.', '+']
+export const MOVES: MOVES[] = ['[', '<', '>', ']', '.', '_']
 export enum MOVE {
   LEFT = '<',
   RIGHT = '>',
   FALL = '.',
-  SOFTDROP = '+',
+  SOFTDROP = '_',
   RIGHTSIDE = ']',
   LEFTSIDE = '[',
 }
-export const LOCK: LOCK = '_'
+export const LOCK: LOCK = ';'
 export const KEYS: KEYS[] = [
   'ArrowLeft', 'ArrowRight', 'ArrowDown', 'ArrowUp',
   'Space', 'Shift', 'KeyZ', 'KeyX',
