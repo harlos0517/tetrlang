@@ -60,7 +60,7 @@ tetrio_operations = board? sep (order sep op_with_order* | sep op_no_order*)
 - [x] ghost piece visualization
 - [x] add key handling visualization
 - [x] adjust format to allow omitting some parameters
-- [ ] aesthetics redesign
 - [x] dynamic delay for different operations
+- [x] spin indicator
 - [ ] settings preset
-- [ ] spin indicator
+- [ ] aesthetics redesign
