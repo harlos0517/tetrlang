@@ -1,8 +1,10 @@
 import { TetrisState, TetrisStateData } from '@/tetris'
-import { Canvas, createCanvas, CanvasRenderingContext2D as CTX } from 'canvas'
+import { Canvas, createCanvas, CanvasRenderingContext2D as CTX, registerFont } from 'canvas'
 import { Cell, DISPLAY_HEIGHT, GRID_WIDTH } from './grid'
 import { getPiecePositions } from './srs'
 import { GARBAGE, HOLD, KEY, KEYS, LOCK, MOVE, PIECE, Position, ROTATE, ROTATION } from './types'
+
+registerFont('./src/hun2.ttf', { family: 'hun' })
 
 export const CELL_SIZE = 32
 export const CELL_BORDER = 1
@@ -45,10 +47,17 @@ export const delayMap: Record<TetrisStateData['operation'], number> = {
   [ROTATE.COUNTERCLOCKWISE]: 1,
   [ROTATE.FLIP]: 1,
   [ROTATE.NOOP]: 1,
-  [LOCK]: 1,
+  [LOCK]: 2,
   [HOLD]: 1,
   'spawn': 1,
   'init': 3,
+}
+
+export const LINES_MAP: Record<number, string> = {
+  1: 'SINGLE',
+  2: 'DOUBLE',
+  3: 'TRIPLE',
+  4: 'QUAD',
 }
 
 export const END_DELAY_MAP = 3
@@ -75,6 +84,14 @@ export const createFrames = (state: TetrisState) => {
 
   // Render next pieces
   renderNextPieces(ctx, state.next)
+
+  // Render spin text
+  renderSpinText(
+    ctx,
+    state.spinned,
+    state.spin,
+    state.clearingLines || [],
+  )
 
   const shouldDuplicate = state.key && state.keyUp
   const ratio = delayMap[state.operation]
@@ -398,4 +415,38 @@ const renderKey = (ctx: CTX, key: KEY | null) => {
     else ctx.strokeStyle = '#FFFFFF'
     renderKeyIcon(ctx, k, ...p(pos.x + 1, pos.y + 1))
   })
+}
+
+const renderSpinText = (
+  ctx: CTX,
+  piece: PIECE | null,
+  spin: boolean | 'mini' | null,
+  clearingLines: number[],
+) => {
+  if (!piece || !spin) return
+
+  const accent = clearingLines.length > 0
+  if (accent) {
+    ctx.fillStyle = PIECE_COLORS[piece]
+    ctx.fillRect(...b(-5, 4, 4, 2))
+  }
+
+  ctx.fillStyle = accent ? '#000000' : PIECE_COLORS[piece]
+  ctx.textAlign = 'right'
+  ctx.textAlign = 'center'
+  ctx.font = 'bold 36px hun'
+  const text = `${piece}-SPIN`
+  ctx.fillText(text, ...p(-3, 5))
+
+  if (accent) {
+    ctx.fillStyle = '#000000'
+    ctx.font = 'bold 24px hun'
+    ctx.fillText(LINES_MAP[clearingLines.length], ...p(-3, 4.2))
+  }
+
+  if (spin !== 'mini') {
+    ctx.fillStyle = PIECE_COLORS[piece]
+    ctx.font = 'bold 16px hun'
+    ctx.fillText('MINI', ...p(-3, 6.2))
+  }
 }

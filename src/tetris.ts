@@ -28,6 +28,8 @@ export interface TetrisStateData {
   keyUp: boolean
   clearingLines?: number[]
   operation: MOVES | ROTATES | LOCK | HOLD | 'spawn' | 'init'
+  spin: boolean | 'mini' | null
+  spinned: PIECE | null
 }
 
 export class TetrisSession {
@@ -113,6 +115,8 @@ export class TetrisState implements TetrisStateData {
   public readonly keyUp: boolean
   public readonly clearingLines?: number[]
   public readonly operation: MOVES | ROTATES | LOCK | HOLD | 'spawn' | 'init'
+  public readonly spin: boolean | 'mini' | null
+  public readonly spinned: PIECE | null
 
   constructor(
     operation: MOVES | ROTATES | LOCK | HOLD | 'spawn' | 'init',
@@ -129,6 +133,8 @@ export class TetrisState implements TetrisStateData {
       key,
       keyUp,
       clearingLines,
+      spin,
+      spinned: spinnedPiece,
     } = data
     const newData: TetrisStateData = {
       grid: dup(grid),
@@ -142,6 +148,8 @@ export class TetrisState implements TetrisStateData {
       keyUp,
       clearingLines: dup(operation === LOCK ? clearingLines || [] : []),
       operation,
+      spin,
+      spinned: spinnedPiece,
     }
     this.grid = newData.grid
     this.piece = newData.piece
@@ -154,6 +162,8 @@ export class TetrisState implements TetrisStateData {
     this.keyUp = newData.keyUp
     this.clearingLines = newData.clearingLines
     this.operation = newData.operation
+    this.spin = newData.spin
+    this.spinned = newData.spinned
   }
 
   public static initFromCompiled(data: Compiled): TetrisState {
@@ -168,6 +178,8 @@ export class TetrisState implements TetrisStateData {
       key: null,
       keyUp: true,
       clearingLines: [],
+      spin: null,
+      spinned: null,
     })
   }
 
@@ -223,7 +235,7 @@ export class TetrisState implements TetrisStateData {
       [MOVE.FALL]: () => position[1]--,
       [LOCK]: () => position[1]--,
     })[move]()
-    const newState = new TetrisState(move, { ...this, key, keyUp: single, position })
+    const newState = new TetrisState(move, { ...this, key, keyUp: single, position, spin: null })
     if (newState.conflict())
       return new TetrisState(op, { ...this, key, keyUp: true })
     return newState
@@ -263,7 +275,42 @@ export class TetrisState implements TetrisStateData {
       toRotation,
     )
     if (!position) return new TetrisState(rotation, { ...this, key, keyUp: true })
-    return new TetrisState(rotation, { ...this, position, rotation: toRotation, key, keyUp: true })
+
+    const rotatedState  = new TetrisState(
+      rotation,
+      { ...this, position, rotation: toRotation, key, keyUp: true, spin: false, spinned: null },
+    )
+
+    const immobilityTests: Position[] = [
+      [0, -1], // down
+      [-1, 0], // left
+      [1, 0], // right
+      [0, 1], // up
+    ]
+    const isSpin = immobilityTests.map(([dx, dy]) => {
+      const testPosition: Position = [position[0] + dx, position[1] + dy]
+      const tempState = new TetrisState(rotation, { ...rotatedState, position: testPosition })
+      return tempState.conflict()
+    }).reduce((a, b) => a && b, true)
+    if (isSpin)
+      return new TetrisState(rotation, { ...rotatedState,  spin: true, spinned: this.piece })
+
+
+    if (this.piece === 'T') {
+      const corners: Position[] = [
+        [position[0] - 1, position[1] - 1],
+        [position[0] + 1, position[1] - 1],
+        [position[0] - 1, position[1] + 1],
+        [position[0] + 1, position[1] + 1],
+      ]
+      const filledCorners = corners.map(([dx, dy]) => {
+        const testPosition: Position = [position[0] + dx, position[1] + dy]
+        return isFillable(this.grid, ...testPosition)
+      })
+      if (filledCorners.length === 3)
+        return new TetrisState(rotation, { ...rotatedState,  spin: 'mini', spinned: this.piece })
+    }
+    return rotatedState
   }
 
   public holdPiece(): TetrisState {
@@ -282,6 +329,8 @@ export class TetrisState implements TetrisStateData {
       rotation: ROTATION.NORTH,
       key,
       keyUp,
+      spin: null,
+      spinned: null,
     })
     if (newState.conflict()) throw new TetrisGameOver(newState)
     return newState
@@ -297,6 +346,8 @@ export class TetrisState implements TetrisStateData {
       rotation: ROTATION.NORTH,
       canHold: true,
       clearingLines: [],
+      spin: null,
+      spinned: null,
     })
     if (spawnState.conflict()) throw new TetrisGameOver(spawnState)
     return spawnState
