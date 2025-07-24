@@ -207,8 +207,8 @@ const renderGhostPiece = (ctx: CTX, state: TetrisState): void => {
   )
 
   for (const [x, y] of positions) {
-    ctx.fillStyle = `${PIECE_COLORS[state.piece]}40`
-    ctx.fillRect(...c(x, y))
+    ctx.strokeStyle = PIECE_COLORS[state.piece]
+    renderBlockBorder(ctx, x, y, 1, 1, 2)
   }
 }
 
@@ -423,9 +423,20 @@ const renderSpinText = (
   spin: boolean | 'mini' | null,
   clearingLines: number[],
 ) => {
+  const accent = clearingLines.length > 0
+
+  ctx.textAlign = 'right'
+  ctx.textAlign = 'center'
+
+  if (accent && !spin) {
+    ctx.fillStyle = '#FFFFFF'
+    ctx.font = 'bold 24px hun'
+    ctx.fillText(LINES_MAP[clearingLines.length], ...p(-3, 4.2))
+    return
+  }
+
   if (!piece || !spin) return
 
-  const accent = clearingLines.length > 0
   if (accent) {
     ctx.fillStyle = PIECE_COLORS[piece]
     ctx.fillRect(...b(-5, 4, 4, 2))
@@ -444,7 +455,7 @@ const renderSpinText = (
     ctx.fillText(LINES_MAP[clearingLines.length], ...p(-3, 4.2))
   }
 
-  if (spin !== 'mini') {
+  if (spin === 'mini') {
     ctx.fillStyle = PIECE_COLORS[piece]
     ctx.font = 'bold 16px hun'
     ctx.fillText('MINI', ...p(-3, 6.2))
