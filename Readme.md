@@ -58,7 +58,7 @@ tetrio_operations = board? sep (order sep op_with_order* | sep op_no_order*)
 # todo
 - [x] clear line visualization
 - [x] ghost piece visualization
-- [ ] add key handling visualization
+- [x] add key handling visualization
 - [x] adjust format to allow omitting some parameters
 - [ ] aesthetics redesign
 - [x] dynamic delay for different operations

@@ -1,5 +1,5 @@
 import { Grid, isFillable } from '@/grid'
-import { KickTable, PIECE, Position, ROTATE, ROTATION, ROTATIONS, Shape } from './types'
+import { KickTable, PIECE, Position, ROTATE, ROTATES, ROTATION, Shape } from './types'
 
 // Piece shapes in each rotation state
 const PIECE_SHAPES: Record<PIECE, Shape> = {
@@ -175,7 +175,7 @@ export const getNextRotation = (
 
 export const getPiecePositions = (
   piece: PIECE,
-  rotation: ROTATIONS,
+  rotation: ROTATES,
   x: number,
   y: number,
 ): Position[] => {
@@ -186,8 +186,8 @@ export const kickTest = (
   grid: Grid,
   piece: PIECE,
   fromPosition: Position,
-  fromRotation: ROTATIONS,
-  toRotation: ROTATIONS,
+  fromRotation: ROTATES,
+  toRotation: ROTATES,
 ): Position | null => {
   const [x, y] = fromPosition
 

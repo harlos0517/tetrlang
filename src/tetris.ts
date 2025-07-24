@@ -27,7 +27,7 @@ export interface TetrisStateData {
   key: KEY | null
   keyUp: boolean
   clearingLines?: number[]
-  operation: MOVES | ROTATES | LOCK | HOLD | 'spawn' | 'clearing' | 'init'
+  operation: MOVES | ROTATES | LOCK | HOLD | 'spawn' | 'init'
 }
 
 export class TetrisSession {
@@ -112,10 +112,10 @@ export class TetrisState implements TetrisStateData {
   public readonly key: KEY | null
   public readonly keyUp: boolean
   public readonly clearingLines?: number[]
-  public readonly operation: MOVES | ROTATES | LOCK | HOLD | 'spawn' | 'clearing' | 'init'
+  public readonly operation: MOVES | ROTATES | LOCK | HOLD | 'spawn' | 'init'
 
   constructor(
-    operation: MOVES | ROTATES | LOCK | HOLD | 'spawn' | 'clearing' | 'init',
+    operation: MOVES | ROTATES | LOCK | HOLD | 'spawn' | 'init',
     data: Omit<TetrisStateData, 'operation'>,
   ) {
     const {
@@ -140,7 +140,7 @@ export class TetrisState implements TetrisStateData {
       next: dup(next),
       key,
       keyUp,
-      clearingLines: dup(operation === 'clearing' ? clearingLines || [] : []),
+      clearingLines: dup(operation === LOCK ? clearingLines || [] : []),
       operation,
     }
     this.grid = newData.grid
@@ -192,7 +192,7 @@ export class TetrisState implements TetrisStateData {
       .every(([x, y]) => isFillable(this.grid, x, y))
   }
 
-  public stepPiece(move: MOVE | LOCK): TetrisState {
+  public stepPiece(move: MOVE | LOCK, single = true): TetrisState {
     const key = {
       [MOVE.LEFTSIDE]: KEY.LEFT,
       [MOVE.RIGHTSIDE]: KEY.RIGHT,
@@ -223,7 +223,7 @@ export class TetrisState implements TetrisStateData {
       [MOVE.FALL]: () => position[1]--,
       [LOCK]: () => position[1]--,
     })[move]()
-    const newState = new TetrisState(move, { ...this, key, keyUp: false, position })
+    const newState = new TetrisState(move, { ...this, key, keyUp: single, position })
     if (newState.conflict())
       return new TetrisState(op, { ...this, key, keyUp: true })
     return newState
@@ -235,7 +235,7 @@ export class TetrisState implements TetrisStateData {
     let end = false
     while (!end) {
       const oldState: TetrisState = lastState || this
-      const newState = oldState.stepPiece(move)
+      const newState = oldState.stepPiece(move, false)
       if (newState.keyUp || move !== LOCK) states.push(newState)
       lastState = newState
       end = newState.keyUp
@@ -326,13 +326,13 @@ export class TetrisState implements TetrisStateData {
     })
 
     const { grid: clearedGrid, clearedLines: clearingLines } = clearLines(newGrid)
-    const lockedState = new TetrisState('clearing', {
+    const lockedState = new TetrisState(LOCK, {
       ...state,
       clearingLines,
       grid: newGrid,
       piece: null,
     })
 
-    return [...lockStates, lockedState, lockedState.spawn(clearedGrid)]
+    return [lockedState, lockedState.spawn(clearedGrid)]
   }
 }

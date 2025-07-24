@@ -16,7 +16,7 @@ export type MOVES = '[' | '<' | '>' | ']' | '.' | '_'
 export type LOCK = ';'
 export type KEYS =
   | 'ArrowLeft' | 'ArrowRight' | 'ArrowDown' | 'ArrowUp'
-  | 'Space' | 'Shift' | 'KeyZ' | 'KeyX'
+  | 'Space' | 'Shift' | 'KeyZ' | 'KeyA'
 
 export const COLS: COL[] = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 export const CONNECTOR: CONNECTOR = '-'
@@ -59,7 +59,7 @@ export enum MOVE {
 export const LOCK: LOCK = ';'
 export const KEYS: KEYS[] = [
   'ArrowLeft', 'ArrowRight', 'ArrowDown', 'ArrowUp',
-  'Space', 'Shift', 'KeyZ', 'KeyX',
+  'Space', 'Shift', 'KeyZ', 'KeyA',
 ]
 export enum KEY {
   LEFT = 'ArrowLeft',

@@ -2,7 +2,7 @@ import { TetrisState, TetrisStateData } from '@/tetris'
 import { Canvas, createCanvas, CanvasRenderingContext2D as CTX } from 'canvas'
 import { Cell, DISPLAY_HEIGHT, GRID_WIDTH } from './grid'
 import { getPiecePositions } from './srs'
-import { GARBAGE, HOLD, LOCK, MOVE, PIECE, Position, ROTATE, ROTATION } from './types'
+import { GARBAGE, HOLD, KEY, KEYS, LOCK, MOVE, PIECE, Position, ROTATE, ROTATION } from './types'
 
 export const CELL_SIZE = 32
 export const CELL_BORDER = 1
@@ -45,16 +45,16 @@ export const delayMap: Record<TetrisStateData['operation'], number> = {
   [ROTATE.COUNTERCLOCKWISE]: 1,
   [ROTATE.FLIP]: 1,
   [ROTATE.NOOP]: 1,
-  [LOCK]: 0,
+  [LOCK]: 1,
   [HOLD]: 1,
   'spawn': 1,
-  'clearing': 1,
   'init': 3,
 }
 
 export const END_DELAY_MAP = 3
+export const KEY_PRESS_RATIO = 0.4
 
-export const createFrame = (state: TetrisState) => {
+export const createFrames = (state: TetrisState) => {
   const { canvas, ctx } = createRenderer()
   init(ctx)
 
@@ -76,12 +76,20 @@ export const createFrame = (state: TetrisState) => {
   // Render next pieces
   renderNextPieces(ctx, state.next)
 
-  // Render key
-  // renderKey(ctx, state.key, state.keyUp)
+  const shouldDuplicate = state.key && state.keyUp
+  const ratio = delayMap[state.operation]
+  const canvas2 = createCanvas(CANVAS_SIZE.WIDTH, CANVAS_SIZE.HEIGHT)
+  const ctx2 = canvas2.getContext('2d')
+  ctx2.drawImage(canvas, 0, 0)
 
-  const delayRatio = delayMap[state.operation]
-
-  return { canvas, ctx, delayRatio }
+  renderKey(ctx, state.key)
+  if (shouldDuplicate) {
+    renderKey(ctx2, null)
+    return [
+      { canvas, ctx, delayRatio: KEY_PRESS_RATIO * ratio },
+      { canvas: canvas2, ctx: ctx2, delayRatio: (1 - KEY_PRESS_RATIO) * ratio },
+    ]
+  } else return [{ canvas, ctx, delayRatio: ratio }]
 }
 
 const p = (x: number, y: number, offsetX = 0, offsetY = 0): [number, number] => ([
@@ -89,7 +97,7 @@ const p = (x: number, y: number, offsetX = 0, offsetY = 0): [number, number] => 
   CANVAS_SIZE.HEIGHT - y * CELL_SIZE - PADDING.BOTTOM * CELL_SIZE - offsetY,
 ])
 
-const r = (x: number, y: number): [number, number, number, number] => ([
+const c = (x: number, y: number): [number, number, number, number] => ([
   x * CELL_SIZE + PADDING.LEFT * CELL_SIZE + CELL_BORDER,
   CANVAS_SIZE.HEIGHT - y * CELL_SIZE - PADDING.BOTTOM * CELL_SIZE - CELL_BORDER,
   CELL_SIZE - GRID_GAP,
@@ -101,6 +109,13 @@ const l = (y: number): [number, number, number, number] => ([
   CANVAS_SIZE.HEIGHT - y * CELL_SIZE - PADDING.BOTTOM * CELL_SIZE - CELL_BORDER,
   CELL_SIZE * 10 - GRID_GAP,
   -CELL_SIZE + GRID_GAP,
+])
+
+const b = (x: number, y: number, w: number, h: number): [number, number, number, number] => ([
+  x * CELL_SIZE + PADDING.LEFT * CELL_SIZE + CELL_BORDER,
+  CANVAS_SIZE.HEIGHT - y * CELL_SIZE - PADDING.BOTTOM * CELL_SIZE - CELL_BORDER,
+  w * CELL_SIZE - GRID_GAP,
+  -h * CELL_SIZE + GRID_GAP,
 ])
 
 const createRenderer = (): { canvas: Canvas, ctx: CTX } => {
@@ -120,7 +135,7 @@ const init = (ctx: CTX): void => {
     for (let x = 0; x < GRID_WIDTH; x++) {
       if ((x + y) % 2 === 0) ctx.fillStyle = '#111111'
       else ctx.fillStyle = '#222222'
-      ctx.fillRect(...r(x, y))
+      ctx.fillRect(...c(x, y))
     }
   }
 
@@ -143,7 +158,7 @@ const renderGrid = (ctx: CTX, grid: Cell[][]): void => {
       const cell = grid[y]?.[x]
       if (!cell) continue
       ctx.fillStyle = PIECE_COLORS[cell]
-      ctx.fillRect(...r(x, y))
+      ctx.fillRect(...c(x, y))
     }
   }
 }
@@ -159,7 +174,7 @@ const renderCurrentPiece = (ctx: CTX, state: TetrisState): void => {
 
   for (const [x, y] of positions) {
     ctx.fillStyle = PIECE_COLORS[state.piece]
-    ctx.fillRect(...r(x, y))
+    ctx.fillRect(...c(x, y))
   }
 }
 
@@ -176,7 +191,7 @@ const renderGhostPiece = (ctx: CTX, state: TetrisState): void => {
 
   for (const [x, y] of positions) {
     ctx.fillStyle = `${PIECE_COLORS[state.piece]}40`
-    ctx.fillRect(...r(x, y))
+    ctx.fillRect(...c(x, y))
   }
 }
 
@@ -195,7 +210,7 @@ const renderHoldPiece = (ctx: CTX, holdPiece: PIECE | null, canHold = true): voi
   for (const [dx, dy] of positions) {
     const position = [holdPosition[0] + dx, holdPosition[1] + dy] as Position
     ctx.fillStyle = canHold ? PIECE_COLORS[holdPiece] : '#555555'
-    ctx.fillRect(...r(...position))
+    ctx.fillRect(...c(...position))
   }
 }
 
@@ -212,9 +227,175 @@ const renderNextPieces = (ctx: CTX, nextPieces: PIECE[]): void => {
       const x = nextX + dx
       const y = nextY + dy
       ctx.fillStyle = PIECE_COLORS[piece]
-      ctx.fillRect(...r(x, y))
+      ctx.fillRect(...c(x, y))
     }
 
     nextY -= dist
   }
+}
+
+const renderBlockBorder = (
+  ctx: CTX,
+  _x: number,
+  _y: number,
+  _w: number,
+  _h: number,
+  border: number,
+) => {
+  const [x, y, w, h] = b(_x, _y, _w, _h)
+  const offset = border / 2
+  ctx.lineWidth = border
+  ctx.beginPath()
+  ctx.moveTo(x + offset, y - offset)
+  ctx.lineTo(x + w - offset, y - offset)
+  ctx.lineTo(x + w - offset, y + h + offset)
+  ctx.lineTo(x + offset, y + h + offset)
+  ctx.closePath()
+  ctx.stroke()
+}
+
+const renderKeyIcon = (ctx: CTX, key: KEYS, x: number, y: number) => {
+  const GAP = CELL_SIZE / 8
+  const pos = [x, y]
+
+  ctx.lineCap = 'round'
+  ctx.lineJoin = 'round'
+  ctx.lineWidth = GAP
+  const _ = (_x: number, _y: number) => [pos[0] + GAP * _x, pos[1] - GAP * _y] as const
+
+  switch (key) {
+    case KEY.SHIFT:
+      ctx.beginPath()
+      ctx.moveTo(..._(-4, 1))
+      ctx.lineTo(..._(4, 1))
+      ctx.lineTo(..._(2, 3))
+      ctx.stroke()
+      ctx.beginPath()
+      ctx.moveTo(..._(4, -1))
+      ctx.lineTo(..._(-4, -1))
+      ctx.lineTo(..._(-2, -3))
+      ctx.stroke()
+      break
+    case KEY.A:
+      ctx.beginPath()
+      ctx.moveTo(..._(-2, -4))
+      ctx.lineTo(..._(-2, 2))
+      ctx.arcTo(..._(-2, 4), ..._(0, 4), GAP * 2)
+      ctx.arcTo(..._(2, 4), ..._(2, 2), GAP * 2)
+      ctx.lineTo(..._(2, -4))
+      ctx.stroke()
+      ctx.beginPath()
+      ctx.moveTo(..._(4, -2))
+      ctx.lineTo(..._(2, -4))
+      ctx.lineTo(..._(0, -2))
+      ctx.stroke()
+      break
+    case KEY.Z:
+      ctx.beginPath()
+      ctx.moveTo(..._(0, -3))
+      ctx.arcTo(..._(3, -3), ..._(3, 0), GAP * 3)
+      ctx.arcTo(..._(3, 3), ..._(0, 3), GAP * 3)
+      ctx.arcTo(..._(-3, 3), ..._(-3, 0), GAP * 3)
+      ctx.lineTo(..._(-3, -2))
+      ctx.stroke()
+      ctx.beginPath()
+      ctx.moveTo(..._(-5, 0))
+      ctx.lineTo(..._(-3, -2))
+      ctx.lineTo(..._(-1, 0))
+      ctx.stroke()
+      break
+    case KEY.UP:
+      ctx.beginPath()
+      ctx.moveTo(..._(0, -3))
+      ctx.arcTo(..._(-3, -3), ..._(-3, 0), GAP * 3)
+      ctx.arcTo(..._(-3, 3), ..._(0, 3), GAP * 3)
+      ctx.arcTo(..._(3, 3), ..._(3, 0), GAP * 3)
+      ctx.lineTo(..._(3, -2))
+      ctx.stroke()
+      ctx.beginPath()
+      ctx.moveTo(..._(5, 0))
+      ctx.lineTo(..._(3, -2))
+      ctx.lineTo(..._(1, 0))
+      ctx.stroke()
+      break
+    case KEY.LEFT:
+      ctx.beginPath()
+      ctx.moveTo(..._(4, 0))
+      ctx.lineTo(..._(-4, 0))
+      ctx.stroke()
+      ctx.beginPath()
+      ctx.moveTo(..._(-2, 2))
+      ctx.lineTo(..._(-4, 0))
+      ctx.lineTo(..._(-2, -2))
+      ctx.stroke()
+      break
+    case KEY.RIGHT:
+      ctx.beginPath()
+      ctx.moveTo(..._(-4, 0))
+      ctx.lineTo(..._(4, 0))
+      ctx.stroke()
+      ctx.beginPath()
+      ctx.moveTo(..._(2, 2))
+      ctx.lineTo(..._(4, 0))
+      ctx.lineTo(..._(2, -2))
+      ctx.stroke()
+      break
+    case KEY.SPACE:
+      ctx.beginPath()
+      ctx.moveTo(..._(0, 4))
+      ctx.lineTo(..._(0, -2))
+      ctx.stroke()
+      ctx.beginPath()
+      ctx.moveTo(..._(-2, 0))
+      ctx.lineTo(..._(0, -2))
+      ctx.lineTo(..._(2, 0))
+      ctx.stroke()
+      ctx.beginPath()
+      ctx.moveTo(..._(-2, -4))
+      ctx.lineTo(..._(2, -4))
+      ctx.stroke()
+      break
+    case KEY.DOWN:
+      ctx.beginPath()
+      ctx.moveTo(..._(0, 4))
+      ctx.lineTo(..._(0, -4))
+      ctx.stroke()
+      ctx.beginPath()
+      ctx.moveTo(..._(-2, -2))
+      ctx.lineTo(..._(0, -4))
+      ctx.lineTo(..._(2, -2))
+      ctx.stroke()
+      break
+    default: return
+  }
+}
+
+const KeyMap: Record<KEYS, { x: number, y: number }> = {
+  [KEY.SHIFT]: { x: -5, y: 13 },
+  [KEY.A]: { x: -3, y: 13 },
+  [KEY.Z]: { x: -5, y: 11 },
+  [KEY.UP]: { x: -3, y: 11 },
+  [KEY.LEFT]: { x: -5, y: 9 },
+  [KEY.RIGHT]: { x: -3, y: 9 },
+  [KEY.SPACE]: { x: -5, y: 7 },
+  [KEY.DOWN]: { x: -3, y: 7 },
+}
+
+const renderKey = (ctx: CTX, key: KEY | null) => {
+  const BLOCK_BORDER = 2
+  ctx.strokeStyle = '#FFFFFF'
+  ctx.fillStyle = '#FFFFFF'
+
+  KEYS.map(k => {
+    const pos = KeyMap[k]
+    if (k === key) ctx.fillRect(...b(pos.x, pos.y, 2, 2))
+    else renderBlockBorder(ctx, pos.x, pos.y, 2, 2, BLOCK_BORDER)
+  })
+
+  KEYS.map(k => {
+    const pos = KeyMap[k]
+    if (k === key) ctx.strokeStyle = '#000000'
+    else ctx.strokeStyle = '#FFFFFF'
+    renderKeyIcon(ctx, k, ...p(pos.x + 1, pos.y + 1))
+  })
 }
