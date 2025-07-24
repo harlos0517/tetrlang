@@ -47,7 +47,7 @@ export class TetrisSession {
   public generate(data: Compiled) {
     try {
       const initialState = TetrisState.initFromCompiled(data)
-      // this.add(initialState) // skipping this makes loop smoother
+      this.add(initialState)
       this.add(initialState.spawn())
 
       for (const operation of data.operations) {

@@ -14,33 +14,42 @@ const delayMap: Record<TetrisStateData['operation'], number> = {
   [ROTATE.COUNTERCLOCKWISE]: 1,
   [ROTATE.FLIP]: 1,
   [ROTATE.NOOP]: 1,
-  [LOCK]: 1,
+  [LOCK]: 0,
   [HOLD]: 1,
   'spawn': 1,
   'clearing': 1,
   'init': 3,
 }
 
+const END_DELAY_MAP = 3
+
 export const generateGif = async(
   compiled: Compiled,
   options: GifOptions & { delay?: number } = {},
   outputPath?: string,
 ) => {
+  const { delay, ...optionsExceptDelay } = options
+
   const session = new TetrisSession(compiled)
   session.generate(compiled)
-  const frames = await Promise.all(session.states.map(async state => {
+  const frames = await Promise.all(session.states.map(async(state, index, arr) => {
     const { canvas } = createFrame(state)
-    return canvas.toBuffer('image/png')
+    const delayRatio = index === arr.length - 1
+      ? END_DELAY_MAP
+      : delayMap[state.operation]
+    const ms = Math.ceil(delayRatio * (delay || 200))
+    const frameDelay =  ms > 0 ?  Math.max(ms, 20) : 0
+    return [canvas.toBuffer('image/png'), frameDelay] as const
   }))
 
-  const { delay, ...optionsExceptDelay } = options
-  const getDelays = (s: TetrisStateData) =>
-    Math.max(Math.ceil(delayMap[s.operation] * (delay || 200)), 20)
+  const filteredFrames = frames.filter(([_, delay]) => delay > 0)
+
   const gifOptions: GifOptions = {
     loop: 0,
     ...optionsExceptDelay,
-    delay: session.states.map(getDelays),
+    delay: filteredFrames.map(f => f[1]),
   }
-  const gif = sharp(frames, { join: { animated: true } }).gif(gifOptions)
+  const gif = sharp(filteredFrames.map(f => f[0]), { join: { animated: true } })
+    .gif(gifOptions)
   return outputPath ? await gif.toFile(outputPath) : await gif.toBuffer()
 }
