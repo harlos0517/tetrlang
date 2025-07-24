@@ -1,27 +1,7 @@
-import { TetrisSession, TetrisStateData } from '@/tetris'
+import { TetrisSession } from '@/tetris'
 import sharp, { GifOptions } from 'sharp'
-import { createFrame } from './renderer'
-import { Compiled, HOLD, LOCK, MOVE, ROTATE } from './types'
-
-const delayMap: Record<TetrisStateData['operation'], number> = {
-  [MOVE.FALL]: 1,
-  [MOVE.LEFT]: 1,
-  [MOVE.RIGHT]: 1,
-  [MOVE.SOFTDROP]: 0,
-  [MOVE.LEFTSIDE]: 0,
-  [MOVE.RIGHTSIDE]: 0,
-  [ROTATE.CLOCKWISE]: 1,
-  [ROTATE.COUNTERCLOCKWISE]: 1,
-  [ROTATE.FLIP]: 1,
-  [ROTATE.NOOP]: 1,
-  [LOCK]: 0,
-  [HOLD]: 1,
-  'spawn': 1,
-  'clearing': 1,
-  'init': 3,
-}
-
-const END_DELAY_MAP = 3
+import { createFrame, END_DELAY_MAP } from './renderer'
+import { Compiled } from './types'
 
 export const generateGif = async(
   compiled: Compiled,
@@ -33,11 +13,9 @@ export const generateGif = async(
   const session = new TetrisSession(compiled)
   session.generate(compiled)
   const frames = await Promise.all(session.states.map(async(state, index, arr) => {
-    const { canvas } = createFrame(state)
-    const delayRatio = index === arr.length - 1
-      ? END_DELAY_MAP
-      : delayMap[state.operation]
-    const ms = Math.ceil(delayRatio * (delay || 200))
+    const { canvas, delayRatio } = createFrame(state)
+    const ratio = index === arr.length - 1 ? END_DELAY_MAP : delayRatio
+    const ms = Math.ceil(ratio * (delay || 200))
     const frameDelay =  ms > 0 ?  Math.max(ms, 20) : 0
     return [canvas.toBuffer('image/png'), frameDelay] as const
   }))

@@ -1,8 +1,8 @@
-import { TetrisState } from '@/tetris'
+import { TetrisState, TetrisStateData } from '@/tetris'
 import { Canvas, createCanvas, CanvasRenderingContext2D as CTX } from 'canvas'
 import { Cell, DISPLAY_HEIGHT, GRID_WIDTH } from './grid'
 import { getPiecePositions } from './srs'
-import { GARBAGE, PIECE, Position, ROTATION } from './types'
+import { GARBAGE, HOLD, LOCK, MOVE, PIECE, Position, ROTATE, ROTATION } from './types'
 
 export const CELL_SIZE = 32
 export const CELL_BORDER = 1
@@ -34,6 +34,26 @@ export const PIECE_COLORS: Record<PIECE | GARBAGE, string> = {
   G: '#808080',
 }
 
+export const delayMap: Record<TetrisStateData['operation'], number> = {
+  [MOVE.FALL]: 1,
+  [MOVE.LEFT]: 1,
+  [MOVE.RIGHT]: 1,
+  [MOVE.SOFTDROP]: 0,
+  [MOVE.LEFTSIDE]: 0,
+  [MOVE.RIGHTSIDE]: 0,
+  [ROTATE.CLOCKWISE]: 1,
+  [ROTATE.COUNTERCLOCKWISE]: 1,
+  [ROTATE.FLIP]: 1,
+  [ROTATE.NOOP]: 1,
+  [LOCK]: 0,
+  [HOLD]: 1,
+  'spawn': 1,
+  'clearing': 1,
+  'init': 3,
+}
+
+export const END_DELAY_MAP = 3
+
 export const createFrame = (state: TetrisState) => {
   const { canvas, ctx } = createRenderer()
   init(ctx)
@@ -47,7 +67,6 @@ export const createFrame = (state: TetrisState) => {
   // Render current piece
   if (state.piece) renderCurrentPiece(ctx, state)
 
-
   // render clearing lines
   if (state.clearingLines) renderClearingLines(ctx, state.clearingLines)
 
@@ -57,7 +76,12 @@ export const createFrame = (state: TetrisState) => {
   // Render next pieces
   renderNextPieces(ctx, state.next)
 
-  return { canvas, ctx }
+  // Render key
+  // renderKey(ctx, state.key, state.keyUp)
+
+  const delayRatio = delayMap[state.operation]
+
+  return { canvas, ctx, delayRatio }
 }
 
 const p = (x: number, y: number, offsetX = 0, offsetY = 0): [number, number] => ([
