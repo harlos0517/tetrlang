@@ -14,8 +14,6 @@ import {
   ROTATION,
 } from './types'
 
-const dup = <T>(obj: T): T => JSON.parse(JSON.stringify(obj))
-
 export interface TetrisStateData {
   grid: Grid
   piece: PIECE | null
@@ -43,7 +41,7 @@ export class TetrisSession {
   }
 
   private add(state: TetrisState): void {
-    this.states.push(new TetrisState(state.operation, dup(state)))
+    this.states.push(new TetrisState(state.operation, state))
   }
 
   public generate(data: Compiled) {
@@ -137,16 +135,16 @@ export class TetrisState implements TetrisStateData {
       spinned: spinnedPiece,
     } = data
     const newData: TetrisStateData = {
-      grid: dup(grid),
+      grid: [...grid.map(r => [...r])],
       piece,
-      position: dup(position),
+      position: [...position],
       rotation,
       hold,
       canHold,
-      next: dup(next),
+      next: [...next],
       key,
       keyUp,
-      clearingLines: dup(operation === LOCK ? clearingLines || [] : []),
+      clearingLines: operation === LOCK ? [...clearingLines || []] : [],
       operation,
       spin,
       spinned: spinnedPiece,
@@ -225,7 +223,7 @@ export class TetrisState implements TetrisStateData {
     }[move]
     if (!this.piece) return new TetrisState(op, { ...this, key, keyUp: true })
 
-    const position = dup(this.position)
+    const position = [...this.position]
     ;({
       [MOVE.LEFTSIDE]: () => position[0]--,
       [MOVE.RIGHTSIDE]: () => position[0]++,
@@ -338,7 +336,7 @@ export class TetrisState implements TetrisStateData {
   public spawn(newGrid?: Grid): TetrisState {
     const spawnState = new TetrisState('spawn', {
       ...this,
-      grid: newGrid || dup(this.grid),
+      grid: newGrid || [...this.grid.map(r => [...r])],
       piece: this.next[0] || null,
       next: this.next.slice(1),
       position: [4, 21] as Position,
@@ -366,7 +364,7 @@ export class TetrisState implements TetrisStateData {
     const state = lockStates[lockStates.length - 1] || this
     if (!state.piece) throw new TetrisOperationError(state, 'No piece to lock')
 
-    const newGrid = dup(state.grid)
+    const newGrid = [...state.grid.map(r => [...r])]
     const positions = getPiecePositions(
       state.piece,
       state.rotation,

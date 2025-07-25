@@ -1,6 +1,6 @@
 import { TetrisSession, TetrisState, TetrisStateData } from '@/tetris'
 import sharp, { GifOptions } from 'sharp'
-import { createFrames } from './renderer'
+import { createFrame } from './renderer'
 import { Compiled, HOLD, LOCK, MOVE, ROTATE } from './types'
 
 const delayMap: Record<TetrisStateData['operation'], number> = {
@@ -84,7 +84,7 @@ export const generateGif = async(
   }).flat()
 
   const frames = framesData.map(({ state, delay }) => {
-    const canvas = createFrames(state)
+    const canvas = createFrame(state)
     return [canvas.toBuffer('image/png'), delay] as const
   })
 
@@ -93,6 +93,10 @@ export const generateGif = async(
 
   const gifOptions: GifOptions = {
     loop: 0,
+    colors: 64,
+    effort: 2,
+    reuse: true,
+    interFrameMaxError: 8,
     ...optionsExceptDelay,
     delay: frames.map(f => f[1]),
   }

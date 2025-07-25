@@ -1,15 +1,15 @@
 import { TetrisState } from '@/tetris'
-import { Canvas, createCanvas, CanvasRenderingContext2D as CTX, registerFont } from 'canvas'
+import { createCanvas, CanvasRenderingContext2D as CTX, registerFont } from 'canvas'
 import { Cell, DISPLAY_HEIGHT, GRID_WIDTH } from './grid'
 import { getPiecePositions } from './srs'
 import { GARBAGE, KEY, KEYS, PIECE, Position, ROTATION } from './types'
 
 registerFont('./src/hun2.ttf', { family: 'hun' })
 
-const CELL_SIZE = 32
-const CELL_BORDER = 1
+const CELL_SIZE = 16
+const CELL_BORDER = CELL_SIZE / 16
 const GRID_GAP = CELL_BORDER * 2
-const LINE_WIDTH = 4
+const LINE_WIDTH = CELL_SIZE / 8
 const BOARD_PADDING = 0 // Padding inset of the board
 const PADDING = {
   TOP: 4,
@@ -43,8 +43,9 @@ const LINES_MAP: Record<number, string> = {
   4: 'QUAD',
 }
 
-export const createFrames = (state: TetrisState) => {
-  const { canvas, ctx } = createRenderer()
+export const createFrame = (state: TetrisState) => {
+  const canvas = createCanvas(CANVAS_SIZE.WIDTH, CANVAS_SIZE.HEIGHT)
+  const ctx = canvas.getContext('2d')
   init(ctx)
 
   renderGrid(ctx, state.grid)
@@ -88,13 +89,6 @@ const b = (x: number, y: number, w: number, h: number): [number, number, number,
   w * CELL_SIZE - GRID_GAP,
   -h * CELL_SIZE + GRID_GAP,
 ])
-
-const createRenderer = (): { canvas: Canvas, ctx: CTX } => {
-  const canvas = createCanvas(CANVAS_SIZE.WIDTH, CANVAS_SIZE.HEIGHT)
-  const ctx = canvas.getContext('2d')
-
-  return { canvas, ctx }
-}
 
 const init = (ctx: CTX): void => {
   // Clear canvas
@@ -161,7 +155,7 @@ const renderGhostPiece = (ctx: CTX, state: TetrisState): void => {
 
   for (const [x, y] of positions) {
     ctx.strokeStyle = PIECE_COLORS[state.piece]
-    renderBlockBorder(ctx, x, y, 1, 1, 2)
+    renderBlockBorder(ctx, x, y, 1, 1, CELL_SIZE / 8)
   }
 }
 
@@ -341,14 +335,14 @@ const renderKeyIcon = (ctx: CTX, key: KEYS, x: number, y: number) => {
 }
 
 const KeyMap: Record<KEYS, { x: number, y: number }> = {
-  [KEY.SHIFT]: { x: -5, y: 13 },
-  [KEY.A]: { x: -3, y: 13 },
-  [KEY.Z]: { x: -5, y: 11 },
-  [KEY.UP]: { x: -3, y: 11 },
-  [KEY.LEFT]: { x: -5, y: 9 },
-  [KEY.RIGHT]: { x: -3, y: 9 },
-  [KEY.SPACE]: { x: -5, y: 7 },
-  [KEY.DOWN]: { x: -3, y: 7 },
+  [KEY.SHIFT]: { x: -5, y: 14 },
+  [KEY.A]: { x: -3, y: 14 },
+  [KEY.Z]: { x: -5, y: 12 },
+  [KEY.UP]: { x: -3, y: 12 },
+  [KEY.LEFT]: { x: -5, y: 10 },
+  [KEY.RIGHT]: { x: -3, y: 10 },
+  [KEY.SPACE]: { x: -5, y: 8 },
+  [KEY.DOWN]: { x: -3, y: 8 },
 }
 
 const renderKey = (ctx: CTX, key: KEY | null) => {
@@ -383,7 +377,7 @@ const renderSpinText = (
 
   if (accent && !spin) {
     ctx.fillStyle = '#FFFFFF'
-    ctx.font = 'bold 24px hun'
+    ctx.font = `bold ${CELL_SIZE * 0.75}px hun`
     ctx.fillText(LINES_MAP[clearingLines.length], ...p(-3, 4.2))
     return
   }
@@ -398,19 +392,19 @@ const renderSpinText = (
   ctx.fillStyle = accent ? '#000000' : PIECE_COLORS[piece]
   ctx.textAlign = 'right'
   ctx.textAlign = 'center'
-  ctx.font = 'bold 36px hun'
+  ctx.font = `bold ${CELL_SIZE * 1.125}px hun`
   const text = `${piece}-SPIN`
   ctx.fillText(text, ...p(-3, 5))
 
   if (accent) {
     ctx.fillStyle = '#000000'
-    ctx.font = 'bold 24px hun'
+    ctx.font = `bold ${CELL_SIZE * 0.75}px hun`
     ctx.fillText(LINES_MAP[clearingLines.length], ...p(-3, 4.2))
   }
 
   if (spin === 'mini') {
     ctx.fillStyle = PIECE_COLORS[piece]
-    ctx.font = 'bold 16px hun'
+    ctx.font = `bold ${CELL_SIZE * 0.75}px hun`
     ctx.fillText('MINI', ...p(-3, 6.2))
   }
 }
