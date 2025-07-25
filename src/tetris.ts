@@ -348,6 +348,8 @@ export class TetrisState implements TetrisStateData {
       clearingLines: [],
       spin: null,
       spinned: null,
+      key: null,
+      keyUp: true,
     })
     if (spawnState.conflict()) throw new TetrisGameOver(spawnState)
     return spawnState
