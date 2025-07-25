@@ -1,5 +1,6 @@
 import {
   Compiled,
+  CONNECTOR,
   HOLD,
   LOCK,
   MOVES,
@@ -29,19 +30,19 @@ const parseRow = (row: string): Row | null => {
     const char = row[i++]
 
     // Handle range_begin (like "-2")
-    if (char === '-' && isFirst()) {
+    if (char === CONNECTOR && isFirst()) {
       const endCol = parseInt(row[i++])
       for (let col = 0; col <= endCol; col++) result[col] = false
 
     // Handle range_end (like "3-" at end)
-    } else if (isCol(char) && isLast() && row[i] === '-') {
+    } else if (isCol(char) && isLast() && row[i] === CONNECTOR) {
       const startCol = parseInt(char)
       for (let col = startCol; col < 10; col++) result[col] = false
       break
 
     // Handle range (like "1-3")
-    } else if (isCol(char) && row[i] === '-' && isCol(row[i + 1])) {
-      i++ // Skip the '-'
+    } else if (isCol(char) && row[i] === CONNECTOR && isCol(row[i + 1])) {
+      i++ // Skip CONNECTOR
       const startCol = parseInt(char)
       const endCol = parseInt(row[i++])
       for (let col = startCol; col <= endCol; col++) result[col] = false

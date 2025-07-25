@@ -1,14 +1,14 @@
 import { Board, GARBAGE, PIECE } from './types'
 
 export type Cell = PIECE | GARBAGE | null
-export type GridRow = Cell[]
+type GridRow = Cell[]
 export type Grid = GridRow[]
 
 export const GRID_WIDTH = 10
-export const GRID_HEIGHT = 40
+const GRID_HEIGHT = 40
 export const DISPLAY_HEIGHT = 20 // Visible rows in the grid
 
-export const createGrid = (): Grid =>
+const createGrid = (): Grid =>
   Array(GRID_HEIGHT).fill(null).map(() => Array(GRID_WIDTH).fill(null as Cell) as GridRow)
 
 export const boardToGrid = (board: Board): Grid => {
@@ -25,8 +25,6 @@ export const boardToGrid = (board: Board): Grid => {
 
   return grid
 }
-
-export const copyGrid = (grid: Grid): Grid => grid.map(row => [...row])
 
 export const isFillable = (grid: Grid, x: number, y: number): boolean =>
   x >= 0 && x < GRID_WIDTH && y >= 0 && y < GRID_HEIGHT && grid[y][x] === null

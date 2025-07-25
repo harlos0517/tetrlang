@@ -83,7 +83,7 @@ export class TetrisSession {
   }
 }
 
-export class TetrisGameOver extends Error {
+class TetrisGameOver extends Error {
   state: TetrisState
 
   constructor(state: TetrisState) {
@@ -93,7 +93,7 @@ export class TetrisGameOver extends Error {
   }
 }
 
-export class TetrisOperationError extends Error {
+class TetrisOperationError extends Error {
   state: TetrisState
 
   constructor(state: TetrisState, message = 'unknown') {

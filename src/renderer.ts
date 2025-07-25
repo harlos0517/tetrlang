@@ -6,26 +6,26 @@ import { GARBAGE, HOLD, KEY, KEYS, LOCK, MOVE, PIECE, Position, ROTATE, ROTATION
 
 registerFont('./src/hun2.ttf', { family: 'hun' })
 
-export const CELL_SIZE = 32
-export const CELL_BORDER = 1
-export const GRID_GAP = CELL_BORDER * 2
-export const LINE_WIDTH = 4
-export const BOARD_PADDING = 0 // Padding inset of the board
-export const PADDING = {
+const CELL_SIZE = 32
+const CELL_BORDER = 1
+const GRID_GAP = CELL_BORDER * 2
+const LINE_WIDTH = 4
+const BOARD_PADDING = 0 // Padding inset of the board
+const PADDING = {
   TOP: 4,
   BOTTOM: 2,
   LEFT: 6,
   RIGHT: 6,
 }
 
-export const MAX_NEXT_PIECES = 5 // Maximum number of next pieces to display
+const MAX_NEXT_PIECES = 5 // Maximum number of next pieces to display
 
-export const CANVAS_SIZE = {
+const CANVAS_SIZE = {
   WIDTH: (GRID_WIDTH + PADDING.LEFT + PADDING.RIGHT) * CELL_SIZE,
   HEIGHT: (DISPLAY_HEIGHT + PADDING.TOP + PADDING.BOTTOM) * CELL_SIZE,
 }
 
-export const PIECE_COLORS: Record<PIECE | GARBAGE, string> = {
+const PIECE_COLORS: Record<PIECE | GARBAGE, string> = {
   I: '#00FFFF',
   J: '#0000FF',
   L: '#FF8000',
@@ -36,7 +36,7 @@ export const PIECE_COLORS: Record<PIECE | GARBAGE, string> = {
   G: '#808080',
 }
 
-export const delayMap: Record<TetrisStateData['operation'], number> = {
+const delayMap: Record<TetrisStateData['operation'], number> = {
   [MOVE.FALL]: 1,
   [MOVE.LEFT]: 1,
   [MOVE.RIGHT]: 1,
@@ -53,7 +53,7 @@ export const delayMap: Record<TetrisStateData['operation'], number> = {
   'init': 3,
 }
 
-export const delayMapWithStep: Record<TetrisStateData['operation'], number> = {
+const delayMapWithStep: Record<TetrisStateData['operation'], number> = {
   [MOVE.FALL]: 1,
   [MOVE.LEFT]: 1,
   [MOVE.RIGHT]: 1,
@@ -70,7 +70,7 @@ export const delayMapWithStep: Record<TetrisStateData['operation'], number> = {
   'init': 3,
 }
 
-export const LINES_MAP: Record<number, string> = {
+const LINES_MAP: Record<number, string> = {
   1: 'SINGLE',
   2: 'DOUBLE',
   3: 'TRIPLE',
@@ -78,7 +78,7 @@ export const LINES_MAP: Record<number, string> = {
 }
 
 export const END_DELAY_MAP = 3
-export const KEY_PRESS_RATIO = 0.4
+const KEY_PRESS_RATIO = 0.4
 
 export const createFrames = (state: TetrisState, withStep = false) => {
   const { canvas, ctx } = createRenderer()

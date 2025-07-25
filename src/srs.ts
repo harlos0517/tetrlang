@@ -131,7 +131,7 @@ const SRSPLUS_O_KICKS: KickTable = {
   },
 }
 
-export const SRSPLUS: Record<PIECE, KickTable> = {
+const SRSPLUS: Record<PIECE, KickTable> = {
   I: SRSPLUS_I_KICKS,
   J: SRSPLUS_KICKS,
   L: SRSPLUS_KICKS,

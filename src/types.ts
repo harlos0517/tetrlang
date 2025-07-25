@@ -4,7 +4,7 @@ export type Position = [number, number]
 export type Shape = Record<ROTATES, Position[]>
 export type KickTable = Record<ROTATES, Record<ROTATES, Position[]>>
 
-export type COL = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
+// export type COL = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
 export type CONNECTOR = '-'
 export type ROW_SEPARATOR = ','
 export type HOLD = '|'
@@ -18,7 +18,7 @@ export type KEYS =
   | 'ArrowLeft' | 'ArrowRight' | 'ArrowDown' | 'ArrowUp'
   | 'Space' | 'Shift' | 'KeyZ' | 'KeyA'
 
-export const COLS: COL[] = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+// export const COLS: COL[] = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 export const CONNECTOR: CONNECTOR = '-'
 export const ROW_SEPARATOR: ROW_SEPARATOR = ','
 export const HOLD: HOLD = '|'
@@ -74,10 +74,6 @@ export enum KEY {
 
 export type Row = boolean[]
 export type Board = Row[]
-export type Order = {
-  holding: PIECE
-  next: PIECE[]
-}
 export type Operation<HasOrder extends boolean> = {
   hold: boolean
   piece: HasOrder extends true ? null : PIECE
@@ -86,6 +82,9 @@ export type Operation<HasOrder extends boolean> = {
 
 export type Compiled = {
   board: Board
-  order: Order | null
+  order: {
+    holding: PIECE
+    next: PIECE[]
+  } | null
   operations: Operation<true>[] | Operation<false>[]
 }
