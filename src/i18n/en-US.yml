@@ -1,0 +1,36 @@
+title: Tetris GIF Generator
+gen: Generate a Tetris GIF from Tetrlang code
+code: The Tetrlang code to compile
+delay: 'Frame delay in milliseconds (default: $1)'
+withStep: 'Show consecutive moving steps (default: false)'
+helpDesc: 'Get help on how to use the Tetrlang command'
+infoDesc: 'Get information about the Tetrlang command'
+help: |2
+  ## Tetrlang code format (Read more at [README](<https://github.com/harlos0517/tetrlang#tetrlang-code-format>))
+  The Tetrlang code is composed of three parts:
+  `board:order:operations`
+  ### board (optional)
+  - `board` consists of rows from bottom to top, separated by commas.
+  - Indicate the garbage holes with column numbers 0 to 9
+  ### order (optional)
+  - Default available pieces are `I`, `J`, `L`, `O`, `S`, `T`, `Z`.
+  - Specify initial hold piece by prepending the piece and `|` (pipe).
+  ### operations
+  `operations` is a sequence of operations to perform on the board.
+  - Lock (space): `;`
+  - Hold (shift): `|` (only when order is provided)
+  - Rotation: `r` (clockwise), `z` (counterclockwise), `a` (180 flip)
+  - Movement: `<` (left), `>` (right), `[` (left to side), `]` (right to side)
+  - Drop: `.` (fall down one step), `_` (soft drop to bottom)
+  - If order was not provided, the first operation must be a piece.
+  ## Examples
+  - no order provided: `2,,,,-1,-2,,,-3::Jr[;Tr[;S[r_r;Z[_r;`
+  - order provided:  `2,,,,-1,-2,,,-3:S|JTLZ:r[;r[;|[r_r;[_r;`
+  - Perfect Clear Opening: `:I|TSZILJOTSZ:r[;_[;[;];r>>;z];]<;z>;;z_z<;`
+info: |2
+  ## Tetrlang Bot
+  - Source code: [GitHub Repository]<https://github.com/harlos0517/tetrlang>)
+  - Developed by [Harlos](<https://github.com/harlos0517>)
+  - Discord: `@harlos_0517`
+  - Twitter: [@Harlos_Music](<https://x.com/Harlos_Music>)
+  - More about me: <https://harlos.me>

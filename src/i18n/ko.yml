@@ -1,0 +1,40 @@
+title: 테트리스 GIF 생성기
+gen: Tetrlang 코드로 테트리스 GIF 생성
+code: 컴파일할 Tetrlang 코드
+delay: '프레임 지연 시간(밀리초) (기본값: $1)'
+withStep: '연속 이동 단계 표시 (기본값: false)'
+helpDesc: 'Tetrlang 명령어 사용법 도움말'
+infoDesc: 'Tetrlang 명령어 정보'
+help: |2
+  ## Tetrlang 코드 형식 (자세한 내용은 [README](<https://github.com/harlos0517/tetrlang#tetrlang-code-format>) 참조)
+  Tetrlang 코드는 세 부분으로 구성됩니다:
+  `보드:순서:조작`
+  ### 보드 (선택사항)
+  - `보드`는 아래에서 위로의 행들로 구성되며 쉼표로 구분됩니다.
+  - 가비지 홀을 열 번호 0부터 9로 표시
+  ### 순서 (선택사항)
+  - 기본 사용 가능한 블록은 `I`, `J`, `L`, `O`, `S`, `T`, `Z`입니다.
+  - 초기 홀드 블록을 지정하려면 블록 앞에 `|`(파이프)를 붙입니다.
+  ### 조작
+  `조작`은 보드에서 수행할 작업 시퀀스입니다.
+  - 고정 (스페이스): `;`
+  - 홀드 (시프트): `|` (순서가 제공된 경우에만)
+  - 회전: `r` (시계방향), `z` (반시계방향), `a` (180도 회전)
+  - 이동: `<` (왼쪽), `>` (오른쪽), `[` (왼쪽 끝까지), `]` (오른쪽 끝까지)
+  - 낙하: `.` (한 칸 아래로), `_` (소프트 드롭으로 바닥까지)
+  - 순서가 제공되지 않은 경우, 첫 번째 조작은 블록이어야 합니다.
+  ## 예시
+  - 순서 미제공: `2,,,,-1,-2,,,-3::Jr[;Tr[;S[r_r;Z[_r;`
+  - 순서 제공: `2,,,,-1,-2,,,-3:S|JTLZ:r[;r[;|[r_r;[_r;`
+  - 퍼펙트 클리어 오프닝: `:I|TSZILJOTSZ:r[;_[;[;];r>>;z];]<;z>;;z_z<;`
+  
+  *번역은 Claude에 의해 생성되었습니다*
+info: |2
+  ## Tetrlang Bot
+  - 소스 코드: [GitHub Repository]<https://github.com/harlos0517/tetrlang>)
+  - 개발자: [Harlos](<https://github.com/harlos0517>)
+  - Discord: `@harlos_0517`
+  - Twitter: [@Harlos_Music](<https://x.com/Harlos_Music>)
+  - 더 알아보기: <https://harlos.me>
+  
+  *번역은 Claude에 의해 생성되었습니다*

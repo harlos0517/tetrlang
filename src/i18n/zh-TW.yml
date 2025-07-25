@@ -1,0 +1,36 @@
+title: 方塊 GIF 產生器
+gen: 從 Tetrlang 產生 GIF
+code: 要編譯的 Tetrlang 格式字串
+delay: '畫格時長（毫秒）（預設：$1）'
+withStep: '顯示連續移動畫格（預設：false）'
+helpDesc: '獲取 Tetrlang 指令使用說明'
+infoDesc: '獲取 Tetrlang 指令相關資訊'
+help: |2
+  ## Tetrlang 格式（詳見 [README](<https://github.com/harlos0517/tetrlang#tetrlang-code-format>)）
+  Tetrlang 格式由三個部分組成：
+  `版面:塊序:操作`
+  ### 版面（可選）
+  - `版面` 由下至上的行組成，以逗號分隔。
+  - 用欄位編號 0 到 9 表示垃圾行的孔洞
+  ### 塊序（可選）
+  - 預設可用方塊為 `I`、`J`、`L`、`O`、`S`、`T`、`Z`。
+  - 在前面加上一個方塊和 `|`（豎線）來指定初始暫存 (hold) 方塊。
+  ### 操作
+  `operations` 是要在棋盤上執行的操作序列。
+  - 鎖定：`;`
+  - 暫存 (hold)：`|`（僅在提供塊序時）
+  - 旋轉：`r`（順）、`z`（逆）、`a`（180）
+  - 移動：`<`（左）、`>`（右）、`[`（左到底）、`]`（右到底）
+  - 下落：`.`（下降一格）、`_`（軟降到底）
+  - 如果未提供塊序，第一個操作必須是方塊。
+  ## 範例
+  - 未提供塊序：`2,,,,-1,-2,,,-3::Jr[;Tr[;S[r_r;Z[_r;`
+  - 提供塊序：`2,,,,-1,-2,,,-3:S|JTLZ:r[;r[;|[r_r;[_r;`
+  - PCO 開局：`:I|TSZILJOTSZ:r[;_[;[;];r>>;z];]<;z>;;z_z<;`
+info: |2
+  ## Tetrlang
+  - 原始碼：[GitHub Repository]<https://github.com/harlos0517/tetrlang>)
+  - 開發者：[哈洛斯 Harlos](<https://github.com/harlos0517>)
+  - Discord：`@harlos_0517`
+  - Twitter：[@Harlos_Music](<https://x.com/Harlos_Music>)
+  - 關於我：<https://harlos.me>

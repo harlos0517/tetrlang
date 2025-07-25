@@ -1,10 +1,12 @@
 import { generateGif } from '@/gif'
+import { t, tMap } from '@/i18n'
 import {
   AttachmentBuilder,
   ChatInputCommandInteraction,
   Client,
   Events,
   GatewayIntentBits,
+  Locale,
   SlashCommandBuilder,
 } from 'discord.js'
 import dotenv from 'dotenv'
@@ -13,6 +15,8 @@ import compiler from './compiler'
 dotenv.config()
 
 const DELAY_MS = 250
+
+const COMMAND = 'tetr'
 
 const client = new Client({
   intents: [
@@ -23,33 +27,40 @@ const client = new Client({
 })
 
 const commands = [
-  new SlashCommandBuilder().setName('tetr')
-    .setDescription('Generate a Tetris GIF from Tetrlang code')
+  new SlashCommandBuilder().setName(COMMAND)
+    .setDescription(t('title'))
+    .setDescriptionLocalizations(tMap('title'))
     .addSubcommand(subcommand => subcommand
       .setName('gen')
-      .setDescription('Generate a Tetris GIF from Tetrlang code')
+      .setDescription(t('gen', Locale.EnglishUS))
+      .setDescriptionLocalizations(tMap('gen'))
       .addStringOption(option => option
         .setName('code')
-        .setDescription('The Tetrlang code to compile')
+        .setDescription(t('code', Locale.EnglishUS))
+        .setDescriptionLocalizations(tMap('code'))
         .setRequired(true)
         .setMaxLength(256),
       ).addIntegerOption(option => option
         .setName('delay')
-        .setDescription(`Frame delay in milliseconds (default: ${DELAY_MS})`)
+        .setDescription(t('delay', Locale.EnglishUS, DELAY_MS))
+        .setDescriptionLocalizations(tMap('delay', DELAY_MS))
         .setRequired(false)
         .setMinValue(100)
         .setMaxValue(2000),
       ).addBooleanOption(option => option
-        .setName('withStep')
-        .setDescription('Show consecutive moving steps (default: false)')
+        .setName('with_step')
+        .setDescription(t('withStep', Locale.EnglishUS))
+        .setDescriptionLocalizations(tMap('withStep'))
         .setRequired(false),
       ),
     ).addSubcommand(subcommand => subcommand
       .setName('help')
-      .setDescription('Get help on how to use the Tetrlang command'),
+      .setDescription(t('helpDesc', Locale.EnglishUS))
+      .setDescriptionLocalizations(tMap('helpDesc')),
     ).addSubcommand(subcommand => subcommand
       .setName('info')
-      .setDescription('Get information about the Tetrlang command'),
+      .setDescription(t('infoDesc', Locale.EnglishUS))
+      .setDescriptionLocalizations(tMap('infoDesc')),
     ),
 ]
 
@@ -69,47 +80,17 @@ client.once(Events.ClientReady, async readyClient => {
 client.on(Events.InteractionCreate, async interaction => {
   if (!interaction.isChatInputCommand()) return
 
-  if (interaction.commandName === 'tetr') {
-    let command = ''
+  if (interaction.commandName === COMMAND) {
     try {
-      command = interaction.options.getSubcommand()
+      const command = interaction.options.getSubcommand()
       if (command === 'help') {
-        const helpMessage =
-// eslint-disable-next-line @stylistic/max-len
-`## Tetrlang code format (Read more at [README](<https://github.com/harlos0517/tetrlang#tetrlang-code-format>))
-The Tetrlang code is composed of three parts:
-\`board:order:operations\`
-- \`board\` consists of rows from bottom to top, separated by commas.
-- Indicate the garbage holes with column numbers 0 to 9
-### Order (optional)
-- Default available pieces are \`I\`, \`J\`, \`L\`, \`O\`, \`S\`, \`T\`, \`Z\`.
-- Specify initial hold piece by prepending the piece and \`|\` (pipe).
-### Operations
-\`operations\` is a sequence of operations to perform on the board.
-- Lock (space): \`;\`
-- Hold (shift): \`|\` (only when order is provided)
-- Rotation: \`r\` (clockwise), \`z\` (counterclockwise), \`a\` (180 flip)
-- Movement: \`<\` (left), \`>\` (right), \`[\` (left to side), \`]\` (right to side)
-- Drop: \`.\` (fall down one step), \`_\` (soft drop to bottom)
-- If order was not provided, the first operation must be a piece.
-## Examples
-- no order provided: \`2,,,,-1,-2,,,-3::Jr[;Tr[;S[r_r;Z[_r;\`
-- order provided:  \`2,,,,-1,-2,,,-3:S|JTLZ:r[;r[;|[r_r;[_r;\`
-- Perfect Clear Opening: \`:I|TSZILJOTSZ:r[;_[;[;];r>>;z];]<;z>;;z_z<;\``
         await interaction.reply({
-          content: helpMessage,
+          content: t('help', interaction.locale),
           flags: 'Ephemeral',
         })
       } else if (command === 'info') {
-        const infoMessage =
-`## Tetrlang Bot
-- Source code: [GitHub Repository]<https://github.com/harlos0517/tetrlang>)
-- Developed by [Harlos](<https://github.com/harlos0517>)
-- Discord: \`@harlos_0517\`
-- Twitter: [@Harlos_Music](<https://x.com/Harlos_Music>)
-- More about me: <https://harlos.me>`
         await interaction.reply({
-          content: infoMessage,
+          content: t('info', interaction.locale),
           flags: 'Ephemeral',
         })
       } else await handleTetrlangCommand(interaction)
@@ -131,7 +112,7 @@ The Tetrlang code is composed of three parts:
 async function handleTetrlangCommand(interaction: ChatInputCommandInteraction) {
   const code = interaction.options.getString('code', true)
   const delay = interaction.options.getInteger('delay')
-  const withStep = interaction.options.getBoolean('withStep', false)
+  const withStep = interaction.options.getBoolean('with_step', false)
 
   await interaction.deferReply()
 

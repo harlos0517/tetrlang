@@ -1,0 +1,38 @@
+title: テトリス GIF ジェネレータ
+gen: Tetrlang コードからテトリス GIF を生成
+code: コンパイルする Tetrlang コード
+delay: 'フレーム遅延（ミリ秒）（デフォルト：$1）'
+withStep: '連続移動ステップを表示（デフォルト：false）'
+helpDesc: 'Tetrlang コマンドの使用方法を取得'
+infoDesc: 'Tetrlang コマンドに関する情報を取得'
+help: |2
+  ## Tetrlang コード形式（詳細は [README](<https://github.com/harlos0517/tetrlang#tetrlang-code-format>) を参照）
+  Tetrlang コードは3つの部分で構成されます：
+  `版面:順序:操作`
+  ### 版面（オプション）
+  - `版面` は下から上への行で構成され、カンマで区切られます。
+  - ゴミ穴を列番号 0 から 9 で示す
+  ### 順序（オプション）
+  - デフォルトで使用可能なピースは `I`、`J`、`L`、`O`、`S`、`T`、`Z` です。
+  - ピースの前に `|`（パイプ）を付けて初期ホールドピースを指定します。
+  ### 操作
+  `operations` はボード上で実行する操作のシーケンスです。
+  - ロック（スペース）：`;`
+  - ホールド（シフト）：`|`（順序が提供された場合のみ）
+  - 回転：`r`（時計回り）、`z`（反時計回り）、`a`（180度反転）
+  - 移動：`<`（左）、`>`（右）、`[`（左端まで）、`]`（右端まで）
+  - 落下：`.`（1ステップ下降）、`_`（ソフトドロップで底まで）
+  - 順序が提供されていない場合、最初の操作はピースでなければなりません。
+  ## 例
+  - 順序なし：`2,,,,-1,-2,,,-3::Jr[;Tr[;S[r_r;Z[_r;`
+  - 順序あり：`2,,,,-1,-2,,,-3:S|JTLZ:r[;r[;|[r_r;[_r;`
+  - パーフェクトクリアオープニング：`:I|TSZILJOTSZ:r[;_[;[;];r>>;z];]<;z>;;z_z<;`
+  *翻訳はClaudeによって生成されました*
+info: |2
+  ## Tetrlang Bot
+  - ソースコード：[GitHub Repository]<https://github.com/harlos0517/tetrlang>)
+  - 開発者：[Harlos](<https://github.com/harlos0517>)
+  - Discord：`@harlos_0517`
+  - Twitter：[@Harlos_Music](<https://x.com/Harlos_Music>)
+  - 私について：<https://harlos.me>
+  *翻訳はClaudeによって生成されました*
