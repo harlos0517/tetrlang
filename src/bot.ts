@@ -8,7 +8,6 @@ import {
   SlashCommandBuilder,
 } from 'discord.js'
 import dotenv from 'dotenv'
-import { GifOptions } from 'sharp'
 import compiler from './compiler'
 
 dotenv.config()
@@ -23,24 +22,30 @@ const client = new Client({
   ],
 })
 
-// Register slash commands
 const commands = [
-  new SlashCommandBuilder()
-    .setName('tetr')
+  new SlashCommandBuilder().setName('tetr')
     .setDescription('Generate a Tetris GIF from Tetrlang code')
-    .addStringOption(option =>
-      option
+    .addSubcommand(subcommand => subcommand
+      .setName('gen')
+      .setDescription('Generate a Tetris GIF from Tetrlang code')
+      .addStringOption(option => option
         .setName('code')
         .setDescription('The Tetrlang code to compile')
-        .setRequired(true),
-    )
-    .addIntegerOption(option =>
-      option
+        .setRequired(true)
+        .setMaxLength(256),
+      ).addIntegerOption(option => option
         .setName('delay')
-        .setDescription('Frame delay in milliseconds (default: 250)')
+        .setDescription(`Frame delay in milliseconds (default: ${DELAY_MS})`)
         .setRequired(false)
-        .setMinValue(50)
+        .setMinValue(100)
         .setMaxValue(2000),
+      ),
+    ).addSubcommand(subcommand => subcommand
+      .setName('help')
+      .setDescription('Get help on how to use the Tetrlang command'),
+    ).addSubcommand(subcommand => subcommand
+      .setName('info')
+      .setDescription('Get information about the Tetrlang command'),
     ),
 ]
 
@@ -60,39 +65,83 @@ client.once(Events.ClientReady, async readyClient => {
 client.on(Events.InteractionCreate, async interaction => {
   if (!interaction.isChatInputCommand()) return
 
-  if (interaction.commandName === 'tetr')
-    await handleTetrlangCommand(interaction)
+  if (interaction.commandName === 'tetr') {
+    let command = ''
+    try {
+      command = interaction.options.getSubcommand()
+      if (command === 'help') {
+        const helpMessage =
+// eslint-disable-next-line @stylistic/max-len
+`## Tetrlang code format (Read more at [README](<https://github.com/harlos0517/tetrlang#tetrlang-code-format>))
+The Tetrlang code is composed of three parts:
+\`board:order:operations\`
+- \`board\` consists of rows from bottom to top, separated by commas.
+- Indicate the garbage holes with column numbers 0 to 9
+### Order (optional)
+- Default available pieces are \`I\`, \`J\`, \`L\`, \`O\`, \`S\`, \`T\`, \`Z\`.
+- Specify initial hold piece by prepending the piece and \`|\` (pipe).
+### Operations
+\`operations\` is a sequence of operations to perform on the board.
+- Lock (space): \`;\`
+- Hold (shift): \`|\` (only when order is provided)
+- Rotation: \`r\` (clockwise), \`z\` (counterclockwise), \`a\` (180 flip)
+- Movement: \`<\` (left), \`>\` (right), \`[\` (left to side), \`]\` (right to side)
+- Drop: \`.\` (fall down one step), \`_\` (soft drop to bottom)
+- If order was not provided, the first operation must be a piece.
+## Examples
+- no order provided: \`2,,,,-1,-2,,,-3::Jr[;Tr[;S[r_r;Z[_r;\`
+- order provided:  \`2,,,,-1,-2,,,-3:S|JTLZ:r[;r[;|[r_r;[_r;\`
+- Perfect Clear Opening: \`:I|TSZILJOTSZ:r[;_[;[;];r>>;z];]<;z>;;z_z<;\``
+        await interaction.reply({
+          content: helpMessage,
+          flags: 'Ephemeral',
+        })
+      } else if (command === 'info') {
+        const infoMessage =
+`## Tetrlang Bot
+- Source code: [GitHub Repository]<https://github.com/harlos0517/tetrlang>)
+- Developed by [Harlos](<https://github.com/harlos0517>)
+- Discord: \`@harlos_0517\`
+- Twitter: [@Harlos_Music](<https://x.com/Harlos_Music>)
+- More about me: <https://harlos.me>`
+        await interaction.reply({
+          content: infoMessage,
+          flags: 'Ephemeral',
+        })
+      } else await handleTetrlangCommand(interaction)
+    } catch(error) {
+      console.error('Error processing Tetrlang command:', error)
+
+      const errorStr = error instanceof Error ? error.message : String(error)
+      const errorMessage = '❌ Error: ' + errorStr
+
+      try {
+        await interaction.editReply(errorMessage)
+      } catch(replyError) {
+        console.error('Error sending error reply: ', replyError)
+      }
+    }
+  }
 })
 
 async function handleTetrlangCommand(interaction: ChatInputCommandInteraction) {
   const code = interaction.options.getString('code', true)
-  const delay = interaction.options.getInteger('delay') || DELAY_MS
+  const delay = interaction.options.getInteger('delay')
 
   await interaction.deferReply()
 
-  try {
-    const gifOptions: GifOptions = {
-      delay,
-      loop: 0,
-    }
+  const gifOptions = { delay: delay ?? DELAY_MS }
 
-    const compiled = compiler(code)
-    const gifBuffer = await generateGif(compiled, gifOptions) as Buffer
+  const compiled = compiler(code)
+  const gifBuffer = await generateGif(compiled, gifOptions) as Buffer
 
-    // Create attachment and send
-    const attachment = new AttachmentBuilder(gifBuffer, { name: 'tetris.gif' })
+  // Create attachment and send
+  const attachment = new AttachmentBuilder(gifBuffer, { name: 'tetris.gif' })
 
-    await interaction.editReply({
-      files: [attachment],
-    })
-  } catch(error) {
-    console.error('Error processing Tetrlang command:', error)
-
-    const errorStr = error instanceof Error ? error.message : String(error)
-    const errorMessage = '❌ Error: ' + errorStr
-
-    await interaction.editReply(errorMessage)
-  }
+  await interaction.editReply({
+    content: `\`\`\`\n${code}\n\`\`\``,
+    files: [attachment],
+  })
 }
 
 // Login with bot token
