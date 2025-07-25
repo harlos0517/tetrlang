@@ -93,10 +93,6 @@ export const generateGif = async(
 
   const gifOptions: GifOptions = {
     loop: 0,
-    colors: 64,
-    effort: 2,
-    reuse: true,
-    interFrameMaxError: 8,
     ...optionsExceptDelay,
     delay: frames.map(f => f[1]),
   }
