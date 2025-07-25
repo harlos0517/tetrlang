@@ -85,7 +85,7 @@ export default (input: string): Compiled => {
   if (context === undefined || opString === undefined || orderString === undefined)
     throw new Error(`Invalid input: ${input}`)
 
-  const rows = context.split(ROW_SEPARATOR)
+  const rows = context ? context.split(ROW_SEPARATOR) : []
   const board: Row[] = []
   let prevRow: Row | null = null
   for (const row of rows) {
