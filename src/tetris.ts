@@ -295,19 +295,18 @@ export class TetrisState implements TetrisStateData {
     if (isSpin)
       return new TetrisState(rotation, { ...rotatedState,  spin: true, spinned: this.piece })
 
-
     if (this.piece === 'T') {
       const corners: Position[] = [
-        [position[0] - 1, position[1] - 1],
-        [position[0] + 1, position[1] - 1],
-        [position[0] - 1, position[1] + 1],
-        [position[0] + 1, position[1] + 1],
+        [-1, -1],
+        [1, -1],
+        [-1, 1],
+        [1, 1],
       ]
-      const filledCorners = corners.map(([dx, dy]) => {
+      const fillableCorners = corners.map(([dx, dy]) => {
         const testPosition: Position = [position[0] + dx, position[1] + dy]
         return isFillable(this.grid, ...testPosition)
-      })
-      if (filledCorners.length === 3)
+      }).filter(Boolean)
+      if (fillableCorners.length <= 1)
         return new TetrisState(rotation, { ...rotatedState,  spin: 'mini', spinned: this.piece })
     }
     return rotatedState
