@@ -111,7 +111,7 @@ export default (input: string): Compiled => {
 
   if (holding.length > 1 || (holding && !PIECES.includes(holding as PIECE)))
     throw new Error(`Invalid holding piece: ${holding}`)
-  if (nextString.length < operations.length)
+  if (orderString && nextString.length < operations.length)
     // eslint-disable-next-line @stylistic/max-len
     throw new Error(`Next pieces count (${nextString.length}) must >= operations count (${operations.length})`)
 
@@ -121,7 +121,7 @@ export default (input: string): Compiled => {
 
   const order = {
     holding: holding as PIECE,
-    next: next as PIECE[],
+    next: (orderString ? next : operations.map(op => op.piece)) as PIECE[],
   }
 
   return {

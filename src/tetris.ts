@@ -66,10 +66,10 @@ export class TetrisSession {
     } catch(error) {
       if (error instanceof TetrisGameOver) {
         this.add(error.state)
-        console.warn('Game Over:', error.state)
+        console.warn('Game Over')
       } else if (error instanceof TetrisOperationError) {
         this.add(error.state)
-        console.warn('Operation Error:', error.state, error.message)
+        console.warn('Operation Error: ', error.message)
       } else
         console.error('Unexpected error during Tetris session generation:', error)
     }
