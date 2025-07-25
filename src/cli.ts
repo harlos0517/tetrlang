@@ -20,10 +20,14 @@ program.command('gen')
   .description('Generate a gif from the input.')
   .argument('<string>', 'string to compile')
   .option('-o, --output <file>', 'output file name', 'output.gif')
-  .option('-d, --delay <ms>', 'frame delay in milliseconds', '500')
+  .option('-d, --delay [ms]', 'frame delay in milliseconds', '500')
+  .option('-s, --with-step', 'show consecutive moving steps', false)
   .action(async(str, options) => {
     const compiled = compiler(str)
-    const gifOptions = { delay: parseInt(options.delay, 10) }
+    const gifOptions = {
+      delay: parseInt(options.delay, 10),
+      withStep: options.withStep,
+    }
     await generateGif(compiled, gifOptions, options.output)
     console.log(`GIF generated at ${options.output}`)
   })

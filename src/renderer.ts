@@ -53,6 +53,23 @@ export const delayMap: Record<TetrisStateData['operation'], number> = {
   'init': 3,
 }
 
+export const delayMapWithStep: Record<TetrisStateData['operation'], number> = {
+  [MOVE.FALL]: 1,
+  [MOVE.LEFT]: 1,
+  [MOVE.RIGHT]: 1,
+  [MOVE.SOFTDROP]: 0.01,
+  [MOVE.LEFTSIDE]: 0.01,
+  [MOVE.RIGHTSIDE]: 0.01,
+  [ROTATE.CLOCKWISE]: 1,
+  [ROTATE.COUNTERCLOCKWISE]: 1,
+  [ROTATE.FLIP]: 1,
+  [ROTATE.NOOP]: 1,
+  [LOCK]: 2,
+  [HOLD]: 1,
+  'spawn': 1,
+  'init': 3,
+}
+
 export const LINES_MAP: Record<number, string> = {
   1: 'SINGLE',
   2: 'DOUBLE',
@@ -63,7 +80,7 @@ export const LINES_MAP: Record<number, string> = {
 export const END_DELAY_MAP = 3
 export const KEY_PRESS_RATIO = 0.4
 
-export const createFrames = (state: TetrisState) => {
+export const createFrames = (state: TetrisState, withStep = false) => {
   const { canvas, ctx } = createRenderer()
   init(ctx)
 
@@ -94,7 +111,7 @@ export const createFrames = (state: TetrisState) => {
   )
 
   const shouldDuplicate = state.key && state.keyUp
-  const ratio = delayMap[state.operation]
+  const ratio = (withStep ? delayMapWithStep : delayMap)[state.operation]
   const canvas2 = createCanvas(CANVAS_SIZE.WIDTH, CANVAS_SIZE.HEIGHT)
   const ctx2 = canvas2.getContext('2d')
   ctx2.drawImage(canvas, 0, 0)

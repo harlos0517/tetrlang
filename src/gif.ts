@@ -5,17 +5,17 @@ import { Compiled } from './types'
 
 export const generateGif = async(
   compiled: Compiled,
-  options: GifOptions & { delay?: number } = {},
+  options: GifOptions & { delay?: number, withStep?: boolean } = {},
   outputPath?: string,
 ) => {
-  const { delay = 200, ...optionsExceptDelay } = options
+  const { delay = 200, withStep = false, ...optionsExceptDelay } = options
 
   const session = new TetrisSession(compiled)
   session.generate(compiled)
   const frames: [Buffer, number][] = []
   for (let i = 0; i < session.states.length; i++) {
     const state = session.states[i]
-    const frameData = createFrames(state)
+    const frameData = createFrames(state, withStep)
     for (const frame of frameData) {
       const { canvas, delayRatio } = frame
       const ms = Math.ceil(delayRatio * delay)

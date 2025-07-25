@@ -39,6 +39,10 @@ const commands = [
         .setRequired(false)
         .setMinValue(100)
         .setMaxValue(2000),
+      ).addBooleanOption(option => option
+        .setName('withStep')
+        .setDescription('Show consecutive moving steps (default: false)')
+        .setRequired(false),
       ),
     ).addSubcommand(subcommand => subcommand
       .setName('help')
@@ -127,10 +131,11 @@ The Tetrlang code is composed of three parts:
 async function handleTetrlangCommand(interaction: ChatInputCommandInteraction) {
   const code = interaction.options.getString('code', true)
   const delay = interaction.options.getInteger('delay')
+  const withStep = interaction.options.getBoolean('withStep', false)
 
   await interaction.deferReply()
 
-  const gifOptions = { delay: delay ?? DELAY_MS }
+  const gifOptions = { delay: delay ?? DELAY_MS, withStep: withStep || false }
 
   const compiled = compiler(code)
   const gifBuffer = await generateGif(compiled, gifOptions) as Buffer
