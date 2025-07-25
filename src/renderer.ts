@@ -1,8 +1,8 @@
-import { TetrisState, TetrisStateData } from '@/tetris'
+import { TetrisState } from '@/tetris'
 import { Canvas, createCanvas, CanvasRenderingContext2D as CTX, registerFont } from 'canvas'
 import { Cell, DISPLAY_HEIGHT, GRID_WIDTH } from './grid'
 import { getPiecePositions } from './srs'
-import { GARBAGE, HOLD, KEY, KEYS, LOCK, MOVE, PIECE, Position, ROTATE, ROTATION } from './types'
+import { GARBAGE, KEY, KEYS, PIECE, Position, ROTATION } from './types'
 
 registerFont('./src/hun2.ttf', { family: 'hun' })
 
@@ -36,40 +36,6 @@ const PIECE_COLORS: Record<PIECE | GARBAGE, string> = {
   G: '#808080',
 }
 
-const delayMap: Record<TetrisStateData['operation'], number> = {
-  [MOVE.FALL]: 1,
-  [MOVE.LEFT]: 1,
-  [MOVE.RIGHT]: 1,
-  [MOVE.SOFTDROP]: 0,
-  [MOVE.LEFTSIDE]: 0,
-  [MOVE.RIGHTSIDE]: 0,
-  [ROTATE.CLOCKWISE]: 1,
-  [ROTATE.COUNTERCLOCKWISE]: 1,
-  [ROTATE.FLIP]: 1,
-  [ROTATE.NOOP]: 1,
-  [LOCK]: 2,
-  [HOLD]: 1,
-  'spawn': 1,
-  'init': 3,
-}
-
-const delayMapWithStep: Record<TetrisStateData['operation'], number> = {
-  [MOVE.FALL]: 1,
-  [MOVE.LEFT]: 1,
-  [MOVE.RIGHT]: 1,
-  [MOVE.SOFTDROP]: 0.01,
-  [MOVE.LEFTSIDE]: 0.01,
-  [MOVE.RIGHTSIDE]: 0.01,
-  [ROTATE.CLOCKWISE]: 1,
-  [ROTATE.COUNTERCLOCKWISE]: 1,
-  [ROTATE.FLIP]: 1,
-  [ROTATE.NOOP]: 1,
-  [LOCK]: 2,
-  [HOLD]: 1,
-  'spawn': 1,
-  'init': 3,
-}
-
 const LINES_MAP: Record<number, string> = {
   1: 'SINGLE',
   2: 'DOUBLE',
@@ -77,53 +43,24 @@ const LINES_MAP: Record<number, string> = {
   4: 'QUAD',
 }
 
-export const END_DELAY_MAP = 3
-const KEY_PRESS_RATIO = 0.4
-
-export const createFrames = (state: TetrisState, withStep = false) => {
+export const createFrames = (state: TetrisState) => {
   const { canvas, ctx } = createRenderer()
   init(ctx)
 
-  // Render board
   renderGrid(ctx, state.grid)
-
-  // Render ghost piece
   if (state.piece) renderGhostPiece(ctx, state)
-
-  // Render current piece
   if (state.piece) renderCurrentPiece(ctx, state)
-
-  // render clearing lines
   if (state.clearingLines) renderClearingLines(ctx, state.clearingLines)
-
-  // Render hold piece
   if (state.hold) renderHoldPiece(ctx, state.hold, state.canHold)
-
-  // Render next pieces
   renderNextPieces(ctx, state.next)
-
-  // Render spin text
   renderSpinText(
     ctx,
     state.spinned,
     state.spin,
     state.clearingLines || [],
   )
-
-  const shouldDuplicate = state.key && state.keyUp
-  const ratio = (withStep ? delayMapWithStep : delayMap)[state.operation]
-  const canvas2 = createCanvas(CANVAS_SIZE.WIDTH, CANVAS_SIZE.HEIGHT)
-  const ctx2 = canvas2.getContext('2d')
-  ctx2.drawImage(canvas, 0, 0)
-
   renderKey(ctx, state.key)
-  if (shouldDuplicate) {
-    renderKey(ctx2, null)
-    return [
-      { canvas, ctx, delayRatio: KEY_PRESS_RATIO * ratio },
-      { canvas: canvas2, ctx: ctx2, delayRatio: (1 - KEY_PRESS_RATIO) * ratio },
-    ]
-  } else return [{ canvas, ctx, delayRatio: ratio }]
+  return canvas
 }
 
 const p = (x: number, y: number, offsetX = 0, offsetY = 0): [number, number] => ([
@@ -183,7 +120,6 @@ const init = (ctx: CTX): void => {
   ctx.lineTo(...p(GRID_WIDTH, 0, offset, -offset))
   ctx.lineTo(...p(GRID_WIDTH, DISPLAY_HEIGHT, offset, -CELL_BORDER))
   ctx.stroke()
-
 }
 
 const renderGrid = (ctx: CTX, grid: Cell[][]): void => {
