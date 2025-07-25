@@ -67,5 +67,6 @@ tetrio_operations = board? sep (order sep op_with_order* | sep op_no_order*)
 - [x] adjust format to allow omitting some parameters
 - [x] dynamic delay for different operations
 - [x] spin indicator
-- [ ] settings preset
-- [ ] aesthetics redesign
+- [ ] everything configurable
+- [ ] presets
+- [ ] more styles
