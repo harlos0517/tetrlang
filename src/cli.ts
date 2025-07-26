@@ -1,6 +1,10 @@
 import compiler from '@/compiler'
 import { generateGif } from '@/gif'
+import { createFrame } from '@/renderer'
+import { TetrisState } from '@/tetris'
+import { KEY, LOCK, PIECE, ROTATION } from '@/types'
 import { Command } from 'commander'
+import sharp from 'sharp'
 
 const program = new Command()
 
@@ -30,6 +34,35 @@ program.command('gen')
     }
     await generateGif(compiled, gifOptions, options.output)
     console.log(`GIF generated at ${options.output}`)
+  })
+
+program.command('frame')
+  .description('Generate an example frame.')
+  .action(async _ => {
+    const canvas = createFrame(new TetrisState(LOCK, {
+      piece: PIECE.I,
+      grid: [
+        ...Array(8).fill(
+          ['G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', null],
+        ),
+        ...Array(32).fill(Array(10).fill(null)),
+      ],
+      position: [8, 10],
+      rotation: ROTATION.EAST,
+      key: KEY.SPACE,
+      keyUp: true,
+      clearingLines: [4, 5, 6, 7],
+      combo: 11,
+      b2b: 64,
+      spin: 'mini',
+      spinned: PIECE.T,
+      hold: PIECE.O,
+      canHold: true,
+      next: [PIECE.J, PIECE.L, PIECE.S, PIECE.Z, PIECE.T],
+    }))
+    const png = sharp(canvas.toBuffer('image/png'))
+    png.toFile('output.png')
+    console.log('PNG generated at output.png')
   })
 
 program.parse()

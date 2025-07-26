@@ -28,6 +28,8 @@ export interface TetrisStateData {
   operation: MOVES | ROTATES | LOCK | HOLD | 'spawn' | 'init'
   spin: boolean | 'mini' | null
   spinned: PIECE | null
+  combo: number
+  b2b: number
 }
 
 export class TetrisSession {
@@ -115,6 +117,8 @@ export class TetrisState implements TetrisStateData {
   public readonly operation: MOVES | ROTATES | LOCK | HOLD | 'spawn' | 'init'
   public readonly spin: boolean | 'mini' | null
   public readonly spinned: PIECE | null
+  public readonly combo: number
+  public readonly b2b: number
 
   constructor(
     operation: MOVES | ROTATES | LOCK | HOLD | 'spawn' | 'init',
@@ -122,46 +126,22 @@ export class TetrisState implements TetrisStateData {
   ) {
     const {
       grid,
-      piece,
       position,
-      rotation,
-      hold,
-      canHold,
       next,
-      key,
-      keyUp,
       clearingLines,
-      spin,
       spinned: spinnedPiece,
+      ...rest
     } = data
     const newData: TetrisStateData = {
-      grid: [...grid.map(r => [...r])],
-      piece,
-      position: [...position],
-      rotation,
-      hold,
-      canHold,
-      next: [...next],
-      key,
-      keyUp,
-      clearingLines: operation === LOCK ? [...clearingLines || []] : [],
+      ...rest,
       operation,
-      spin,
+      grid: [...grid.map(r => [...r])],
+      position: [...position],
+      next: [...next],
+      clearingLines: operation === LOCK ? [...clearingLines || []] : [],
       spinned: spinnedPiece,
     }
-    this.grid = newData.grid
-    this.piece = newData.piece
-    this.position = newData.position
-    this.rotation = newData.rotation
-    this.hold = newData.hold
-    this.canHold = newData.canHold
-    this.next = newData.next
-    this.key = newData.key
-    this.keyUp = newData.keyUp
-    this.clearingLines = newData.clearingLines
-    this.operation = newData.operation
-    this.spin = newData.spin
-    this.spinned = newData.spinned
+    Object.assign(this, newData)
   }
 
   public static initFromCompiled(data: Compiled): TetrisState {
@@ -178,6 +158,8 @@ export class TetrisState implements TetrisStateData {
       clearingLines: [],
       spin: null,
       spinned: null,
+      combo: 0,
+      b2b: 0,
     })
   }
 
@@ -359,6 +341,12 @@ export class TetrisState implements TetrisStateData {
     return state.position
   }
 
+  public perfectClear(): boolean {
+    return (this.clearingLines || []).length > 0 &&  this.grid.every((row, i) =>
+      this.clearingLines?.includes(i) || row.every(cell => !cell),
+    )
+  }
+
   public lockPiece(): TetrisState[] {
     const lockStates = this.movePiece(LOCK)
     const state = lockStates[lockStates.length - 1] || this
@@ -376,11 +364,16 @@ export class TetrisState implements TetrisStateData {
     })
 
     const { grid: clearedGrid, clearedLines: clearingLines } = clearLines(newGrid)
+    const maintainsB2B = state.spin || clearingLines.length >= 4
     const lockedState = new TetrisState(LOCK, {
       ...state,
       clearingLines,
       grid: newGrid,
       piece: null,
+      combo: clearingLines.length > 0 ? state.combo + 1 : 0,
+      b2b: clearingLines.length > 0
+        ? maintainsB2B ? state.b2b + 1 : 0
+        : state.b2b,
     })
 
     return [lockedState, lockedState.spawn(clearedGrid)]

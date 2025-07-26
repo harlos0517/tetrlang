@@ -8,6 +8,7 @@
   "scripts": {
     "lint": "eslint",
     "tetr": "tsx src/cli.ts",
+    "dev": "tsx watch src/cli.ts frame",
     "bot": "tsx src/bot.ts"
   },
   "dependencies": {

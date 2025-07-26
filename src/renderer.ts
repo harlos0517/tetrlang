@@ -27,12 +27,12 @@ const CANVAS_SIZE = {
 
 const PIECE_COLORS: Record<PIECE | GARBAGE, string> = {
   I: '#00FFFF',
-  J: '#0000FF',
+  J: '#0040FF',
   L: '#FF8000',
-  O: '#FFFF00',
-  S: '#00FF00',
+  O: '#FFDD00',
+  S: '#00CC00',
   Z: '#FF0000',
-  T: '#800080',
+  T: '#FF00FF',
   G: '#808080',
 }
 
@@ -61,6 +61,9 @@ export const createFrame = (state: TetrisState) => {
     state.clearingLines || [],
   )
   renderKey(ctx, state.key)
+  if (state.combo > 1) renderComboText(ctx, state.combo)
+  if (state.b2b > 1) renderB2BText(ctx, state.b2b)
+  if (state.perfectClear()) renderPerfectClearText(ctx)
   return canvas
 }
 
@@ -114,6 +117,16 @@ const init = (ctx: CTX): void => {
   ctx.lineTo(...p(GRID_WIDTH, 0, offset, -offset))
   ctx.lineTo(...p(GRID_WIDTH, DISPLAY_HEIGHT, offset, -CELL_BORDER))
   ctx.stroke()
+
+  ctx.fillStyle = '#FFFFFF'
+  ctx.font = `bold ${CELL_SIZE}px hun`
+  ctx.textAlign = 'center'
+  ctx.fillText('TETR\nLANG', ...p(-3, 22))
+
+  ctx.fillStyle = '#888888'
+  ctx.font = `bold ${CELL_SIZE * 0.75}px hun`
+  ctx.textAlign = 'center'
+  ctx.fillText('MADE BY\n HARLOS', ...p(13, 22))
 }
 
 const renderGrid = (ctx: CTX, grid: Cell[][]): void => {
@@ -378,7 +391,7 @@ const renderSpinText = (
   if (accent && !spin) {
     ctx.fillStyle = '#FFFFFF'
     ctx.font = `bold ${CELL_SIZE * 0.75}px hun`
-    ctx.fillText(LINES_MAP[clearingLines.length], ...p(-3, 4.2))
+    ctx.fillText(LINES_MAP[clearingLines.length], ...p(-3, 5))
     return
   }
 
@@ -386,25 +399,46 @@ const renderSpinText = (
 
   if (accent) {
     ctx.fillStyle = PIECE_COLORS[piece]
-    ctx.fillRect(...b(-5, 4, 4, 2))
+    ctx.fillRect(...b(-5, 4.8, 4, 2))
   }
 
   ctx.fillStyle = accent ? '#000000' : PIECE_COLORS[piece]
   ctx.textAlign = 'right'
   ctx.textAlign = 'center'
-  ctx.font = `bold ${CELL_SIZE * 1.125}px hun`
+  ctx.font = `bold ${CELL_SIZE * 1.12}px hun`
   const text = `${piece}-SPIN`
-  ctx.fillText(text, ...p(-3, 5))
+  ctx.fillText(text, ...p(-3, 5.8))
 
   if (accent) {
     ctx.fillStyle = '#000000'
     ctx.font = `bold ${CELL_SIZE * 0.75}px hun`
-    ctx.fillText(LINES_MAP[clearingLines.length], ...p(-3, 4.2))
+    ctx.fillText(LINES_MAP[clearingLines.length], ...p(-3, 5))
   }
 
   if (spin === 'mini') {
     ctx.fillStyle = PIECE_COLORS[piece]
     ctx.font = `bold ${CELL_SIZE * 0.75}px hun`
-    ctx.fillText('MINI', ...p(-3, 6.2))
+    ctx.fillText('MINI', ...p(-3, 7))
   }
+}
+
+const renderComboText = (ctx: CTX, combo: number) => {
+  ctx.fillStyle = '#FFFFFF'
+  ctx.font = `bold ${CELL_SIZE * 0.75}px hun`
+  ctx.textAlign = 'center'
+  ctx.fillText(`${combo - 1} COMBO`, ...p(-3, 3.5))
+}
+
+const renderB2BText = (ctx: CTX, b2b: number) => {
+  ctx.fillStyle = '#FFFFFF'
+  ctx.font = `bold ${CELL_SIZE * 0.75}px hun`
+  ctx.textAlign = 'center'
+  ctx.fillText(`B2B x ${b2b - 1}`, ...p(-3, 2))
+}
+
+const renderPerfectClearText = (ctx: CTX) => {
+  ctx.fillStyle = '#FFBB00'
+  ctx.font = `bold ${CELL_SIZE * 1.75}px hun`
+  ctx.textAlign = 'center'
+  ctx.fillText('PERFECT\n  CLEAR', ...p(5, 15))
 }
