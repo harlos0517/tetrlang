@@ -364,7 +364,7 @@ export class TetrisState implements TetrisStateData {
     })
 
     const { grid: clearedGrid, clearedLines: clearingLines } = clearLines(newGrid)
-    const maintainsB2B = state.spin || clearingLines.length >= 4
+    const maintainsB2B = state.spin || clearingLines.length >= 4 || this.perfectClear()
     const lockedState = new TetrisState(LOCK, {
       ...state,
       clearingLines,
