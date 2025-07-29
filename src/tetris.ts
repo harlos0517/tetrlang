@@ -302,6 +302,7 @@ export class TetrisState implements TetrisStateData {
     const newState = new TetrisState(HOLD, {
       ...this,
       piece: this.hold || this.next[0] as PIECE,
+      next: this.next.slice(this.hold ? 0 : 1),
       hold: this.piece,
       canHold: false,
       position: [4, 21],
