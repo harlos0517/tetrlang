@@ -75,9 +75,8 @@ export enum KEY {
 export type Row = boolean[]
 export type Board = Row[]
 export type Operation<HasOrder extends boolean> = {
-  hold: boolean
   piece: HasOrder extends true ? null : PIECE
-  ops: (MOVES | ROTATES)[]
+  ops: (MOVES | ROTATES | HOLD)[]
 }
 
 export type Compiled = {

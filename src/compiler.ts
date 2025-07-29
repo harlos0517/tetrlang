@@ -63,18 +63,12 @@ const parseOperations = <HasOrder extends boolean>(
 ): Operation<HasOrder>[] => {
   const slicedOperations = operations.endsWith(LOCK) ? operations.slice(0, -1) : operations
   return slicedOperations.split(LOCK).map(op => {
-    let hold = false
-    if (op.startsWith(HOLD)) {
-      op = op.slice(1)
-      hold = true
-    }
-    const ops = op.split('') as (MOVES | ROTATES)[]
+    const ops = op.split('') as (MOVES | ROTATES | HOLD)[]
     const piece = hasOrder ? null : ops.shift() as PIECE
     if (piece && !PIECES.includes(piece)) throw new Error(`Invalid piece: ${piece}`)
-    if (ops.some(op => ![...ROTATES, ...MOVES].includes(op)))
+    if (ops.some(op => ![...ROTATES, ...MOVES, HOLD].includes(op)))
       throw new Error(`Invalid operation: ${op}`)
     return {
-      hold,
       piece: piece as HasOrder extends true ? null : PIECE,
       ops,
     }

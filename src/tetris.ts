@@ -54,7 +54,6 @@ export class TetrisSession {
 
       for (const operation of data.operations) {
         const allOperations = [
-          ...operation.hold ? [HOLD] : [],
           ...operation.ops,
           LOCK,
         ]
