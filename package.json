@@ -3,7 +3,7 @@
   "type": "module",
   "version": "0.0.1",
   "description": "a Tetris language",
-  "author": "Harlos <cces4415@gmail.com>",
+  "author": "村田ハル <murataharu0517@gmail.com>",
   "license": "MIT",
   "scripts": {
     "lint": "eslint",

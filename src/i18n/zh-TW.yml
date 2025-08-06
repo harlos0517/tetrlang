@@ -6,7 +6,7 @@ withStep: '顯示連續移動畫格（預設：false）'
 helpDesc: '獲取 Tetrlang 指令使用說明'
 infoDesc: '獲取 Tetrlang 指令相關資訊'
 help: |2
-  ## Tetrlang 格式（詳見 [README](<https://github.com/harlos0517/tetrlang#tetrlang-code-format>)）
+  ## Tetrlang 格式（詳見 [README](<https://github.com/murataharu0803/tetrlang#tetrlang-code-format>)）
   Tetrlang 格式由三個部分組成：
   `版面:塊序:操作`
   ### 版面（可選）
@@ -29,8 +29,7 @@ help: |2
   - PCO 開局：`:I|TSZILJOTSZ:r[;_[;[;];r>>;z];]<;z>;;z_z<;`
 info: |2
   ## Tetrlang
-  - 原始碼：[GitHub Repository]<https://github.com/harlos0517/tetrlang>)
-  - 開發者：[哈洛斯 Harlos](<https://github.com/harlos0517>)
-  - Discord：`@harlos_0517`
-  - Twitter：[@Harlos_Music](<https://x.com/Harlos_Music>)
-  - 關於我：<https://harlos.me>
+  - 原始碼：[GitHub Repository]<https://github.com/murataharu0803/tetrlang>)
+  - 開發者：[村田ハル](<https://github.com/murataharu0803>)
+  - Discord：`@murataharu`
+  - Twitter：[@murataharu_0803](<https://x.com/murataharu_0803>)

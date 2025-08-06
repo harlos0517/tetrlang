@@ -6,7 +6,7 @@ withStep: '連続移動ステップを表示（デフォルト：false）'
 helpDesc: 'Tetrlang コマンドの使用方法を取得'
 infoDesc: 'Tetrlang コマンドに関する情報を取得'
 help: |2
-  ## Tetrlang コード形式（詳細は [README](<https://github.com/harlos0517/tetrlang#tetrlang-code-format>) を参照）
+  ## Tetrlang コード形式（詳細は [README](<https://github.com/murataharu0803/tetrlang#tetrlang-code-format>) を参照）
   Tetrlang コードは3つの部分で構成されます：
   `版面:順序:操作`
   ### 版面（オプション）
@@ -30,9 +30,8 @@ help: |2
   *翻訳はClaudeによって生成されました*
 info: |2
   ## Tetrlang Bot
-  - ソースコード：[GitHub Repository]<https://github.com/harlos0517/tetrlang>)
-  - 開発者：[Harlos](<https://github.com/harlos0517>)
-  - Discord：`@harlos_0517`
-  - Twitter：[@Harlos_Music](<https://x.com/Harlos_Music>)
-  - 私について：<https://harlos.me>
+  - ソースコード：[GitHub Repository]<https://github.com/murataharu0803/tetrlang>)
+  - 開発者：[村田ハル](<https://github.com/murataharu0803>)
+  - Discord：`@murataharu`
+  - Twitter：[@murataharu_0803](<https://x.com/murataharu_0803>)
   *翻訳はClaudeによって生成されました*

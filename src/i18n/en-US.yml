@@ -6,7 +6,7 @@ withStep: 'Show consecutive moving steps (default: false)'
 helpDesc: 'Get help on how to use the Tetrlang command'
 infoDesc: 'Get information about the Tetrlang command'
 help: |2
-  ## Tetrlang code format (Read more at [README](<https://github.com/harlos0517/tetrlang#tetrlang-code-format>))
+  ## Tetrlang code format (Read more at [README](<https://github.com/murataharu0803/tetrlang#tetrlang-code-format>))
   The Tetrlang code is composed of three parts:
   `board:order:operations`
   ### board (optional)
@@ -29,8 +29,7 @@ help: |2
   - Perfect Clear Opening: `:I|TSZILJOTSZ:r[;_[;[;];r>>;z];]<;z>;;z_z<;`
 info: |2
   ## Tetrlang Bot
-  - Source code: [GitHub Repository]<https://github.com/harlos0517/tetrlang>)
-  - Developed by [Harlos](<https://github.com/harlos0517>)
-  - Discord: `@harlos_0517`
-  - Twitter: [@Harlos_Music](<https://x.com/Harlos_Music>)
-  - More about me: <https://harlos.me>
+  - Source code: [GitHub Repository]<https://github.com/murataharu0803/tetrlang>)
+  - Developed by [村田ハル](<https://github.com/murataharu0803>)
+  - Discord：`@murataharu`
+  - Twitter：[@murataharu_0803](<https://x.com/murataharu_0803>)

@@ -124,9 +124,9 @@ const init = (ctx: CTX): void => {
   ctx.fillText('TETR\nLANG', ...p(-3, 22))
 
   ctx.fillStyle = '#888888'
-  ctx.font = `bold ${CELL_SIZE * 0.75}px hun`
+  ctx.font = `bold ${CELL_SIZE * 0.6}px hun`
   ctx.textAlign = 'center'
-  ctx.fillText('MADE BY\n HARLOS', ...p(13, 22))
+  ctx.fillText('    MADE BY\nMURATAHARU', ...p(13, 22))
 }
 
 const renderGrid = (ctx: CTX, grid: Cell[][]): void => {

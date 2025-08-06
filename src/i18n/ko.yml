@@ -6,7 +6,7 @@ withStep: '연속 이동 단계 표시 (기본값: false)'
 helpDesc: 'Tetrlang 명령어 사용법 도움말'
 infoDesc: 'Tetrlang 명령어 정보'
 help: |2
-  ## Tetrlang 코드 형식 (자세한 내용은 [README](<https://github.com/harlos0517/tetrlang#tetrlang-code-format>) 참조)
+  ## Tetrlang 코드 형식 (자세한 내용은 [README](<https://github.com/murataharu0803/tetrlang#tetrlang-code-format>) 참조)
   Tetrlang 코드는 세 부분으로 구성됩니다:
   `보드:순서:조작`
   ### 보드 (선택사항)
@@ -31,10 +31,8 @@ help: |2
   *번역은 Claude에 의해 생성되었습니다*
 info: |2
   ## Tetrlang Bot
-  - 소스 코드: [GitHub Repository]<https://github.com/harlos0517/tetrlang>)
-  - 개발자: [Harlos](<https://github.com/harlos0517>)
-  - Discord: `@harlos_0517`
-  - Twitter: [@Harlos_Music](<https://x.com/Harlos_Music>)
-  - 더 알아보기: <https://harlos.me>
-  
+  - 소스 코드: [GitHub Repository]<https://github.com/murataharu0803/tetrlang>)
+  - 개발자: [村田ハル](<https://github.com/murataharu0803>)
+  - Discord：`@murataharu`
+  - Twitter：[@murataharu_0803](<https://x.com/murataharu_0803>)
   *번역은 Claude에 의해 생성되었습니다*
