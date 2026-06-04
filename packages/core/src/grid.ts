@@ -1,4 +1,4 @@
-import { Board, GARBAGE, PIECE } from './types'
+import { type Board, GARBAGE, PIECE } from './types.js'
 
 export type Cell = PIECE | GARBAGE | null
 type GridRow = Cell[]

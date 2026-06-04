@@ -1,5 +1,5 @@
-import { Grid, isFillable } from '@/grid'
-import { KickTable, PIECE, Position, ROTATE, ROTATES, ROTATION, Shape } from './types'
+import { type Grid, isFillable } from './grid.js'
+import { type KickTable, PIECE, type Position, ROTATE, ROTATES, ROTATION, type Shape } from './types.js'
 
 // Piece shapes in each rotation state
 const PIECE_SHAPES: Record<PIECE, Shape> = {
@@ -198,5 +198,5 @@ export const kickTest = (
     const piecePositions = getPiecePositions(piece, toRotation, x + dx, y + dy)
     if (piecePositions.every(([px, py]) => isFillable(grid, px, py))) return [x + dx, y + dy]
   }
-  return null // Rotation cancelled
+  return null
 }

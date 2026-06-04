@@ -1,4 +1,9 @@
-onlyBuiltDependencies:
-  - canvas
-  - esbuild
-  - sharp
+packages:
+  - packages/*
+
+allowBuilds:
+  canvas: true
+  esbuild: true
+  sharp: true
+
+minimumReleaseAge: 0

@@ -1,16 +1,26 @@
-import { TetrisState } from '@/tetris'
 import { createCanvas, CanvasRenderingContext2D as CTX, registerFont } from 'canvas'
-import { Cell, DISPLAY_HEIGHT, GRID_WIDTH } from './grid'
-import { getPiecePositions } from './srs'
-import { GARBAGE, KEY, KEYS, PIECE, Position, ROTATION } from './types'
+import {
+  type Cell,
+  DISPLAY_HEIGHT,
+  GARBAGE,
+  getPiecePositions,
+  GRID_WIDTH,
+  KEY,
+  KEYS,
+  PIECE,
+  type Position,
+  ROTATION,
+  TetrisState,
+} from 'tetrlang-core'
+import { fileURLToPath } from 'url'
 
-registerFont('./src/hun2.ttf', { family: 'hun' })
+registerFont(fileURLToPath(new URL('../hun2.ttf', import.meta.url)), { family: 'hun' })
 
 const CELL_SIZE = 16
 const CELL_BORDER = CELL_SIZE / 16
 const GRID_GAP = CELL_BORDER * 2
 const LINE_WIDTH = CELL_SIZE / 8
-const BOARD_PADDING = 0 // Padding inset of the board
+const BOARD_PADDING = 0
 const PADDING = {
   TOP: 4,
   BOTTOM: 2,
@@ -18,7 +28,7 @@ const PADDING = {
   RIGHT: 6,
 }
 
-const MAX_NEXT_PIECES = 5 // Maximum number of next pieces to display
+const MAX_NEXT_PIECES = 5
 
 const CANVAS_SIZE = {
   WIDTH: (GRID_WIDTH + PADDING.LEFT + PADDING.RIGHT) * CELL_SIZE,
@@ -94,11 +104,9 @@ const b = (x: number, y: number, w: number, h: number): [number, number, number,
 ])
 
 const init = (ctx: CTX): void => {
-  // Clear canvas
   ctx.fillStyle = '#000000'
   ctx.fillRect(0, 0, CANVAS_SIZE.WIDTH, CANVAS_SIZE.HEIGHT)
 
-  // Draw checkered background
   for (let y = 0; y < DISPLAY_HEIGHT; y++) {
     for (let x = 0; x < GRID_WIDTH; x++) {
       if ((x + y) % 2 === 0) ctx.fillStyle = '#111111'
@@ -107,7 +115,6 @@ const init = (ctx: CTX): void => {
     }
   }
 
-  // Draw grid border
   ctx.strokeStyle = '#FFFFFF'
   ctx.lineWidth = LINE_WIDTH
   const offset = LINE_WIDTH / 2 - CELL_BORDER + BOARD_PADDING
@@ -126,7 +133,7 @@ const init = (ctx: CTX): void => {
   ctx.fillStyle = '#888888'
   ctx.font = `bold ${CELL_SIZE * 0.6}px hun`
   ctx.textAlign = 'center'
-  ctx.fillText('    MADE BY\nMURATAHARU', ...p(13, 22))
+  ctx.fillText('MADE BY\nHARLOS', ...p(13, 22))
 }
 
 const renderGrid = (ctx: CTX, grid: Cell[][]): void => {
@@ -180,7 +187,6 @@ const renderClearingLines = (ctx: CTX, clearingLines: number[]): void => {
 const renderHoldPiece = (ctx: CTX, holdPiece: PIECE | null, canHold = true): void => {
   if (!holdPiece) return
 
-  // Render hold piece in left side area
   const holdPosition = [-4, 17]
 
   const positions = getPiecePositions(holdPiece, ROTATION.NORTH, 0, 0)
@@ -385,7 +391,6 @@ const renderSpinText = (
 ) => {
   const accent = clearingLines.length > 0
 
-  ctx.textAlign = 'right'
   ctx.textAlign = 'center'
 
   if (accent && !spin) {
@@ -403,7 +408,6 @@ const renderSpinText = (
   }
 
   ctx.fillStyle = accent ? '#000000' : PIECE_COLORS[piece]
-  ctx.textAlign = 'right'
   ctx.textAlign = 'center'
   ctx.font = `bold ${CELL_SIZE * 1.12}px hun`
   const text = `${piece}-SPIN`

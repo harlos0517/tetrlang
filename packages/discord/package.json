@@ -1,0 +1,19 @@
+{
+  "name": "tetrlang-discord",
+  "type": "module",
+  "version": "0.0.1",
+  "description": "Discord bot plugin for tetrlang",
+  "author": "Harlos <murataharu0517@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "dev": "tsx watch src/bot.ts",
+    "start": "tsx src/bot.ts"
+  },
+  "dependencies": {
+    "discord.js": "^14.21.0",
+    "dotenv": "^17.2.0",
+    "tetrlang-core": "workspace:*",
+    "tetrlang-renderer": "workspace:*",
+    "yaml": "^2.8.0"
+  }
+}

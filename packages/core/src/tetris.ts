@@ -1,18 +1,18 @@
-import { Grid, boardToGrid, clearLines, isFillable } from './grid'
-import { getNextRotation, getPiecePositions, kickTest } from './srs'
+import { type Grid, boardToGrid, clearLines, isFillable } from './grid.js'
+import { getNextRotation, getPiecePositions, kickTest } from './srs.js'
 import {
-  Compiled,
+  type Compiled,
   HOLD,
   KEY,
   LOCK,
   MOVE,
   MOVES,
   PIECE,
-  Position,
+  type Position,
   ROTATE,
   ROTATES,
   ROTATION,
-} from './types'
+} from './types.js'
 
 export interface TetrisStateData {
   grid: Grid
@@ -65,15 +65,12 @@ export class TetrisSession {
     } catch(error) {
       if (error instanceof TetrisGameOver) {
         this.add(error.state)
-        console.warn('Game Over')
       } else if (error instanceof TetrisOperationError) {
         this.add(error.state)
-        console.warn('Operation Error: ', error.message)
       } else
-        console.error('Unexpected error during Tetris session generation:', error)
+        throw error
     }
 
-    console.log(this.states.length, 'states generated')
     this.generated = true
   }
 
@@ -123,24 +120,21 @@ export class TetrisState implements TetrisStateData {
     operation: MOVES | ROTATES | LOCK | HOLD | 'spawn' | 'init',
     data: Omit<TetrisStateData, 'operation'>,
   ) {
-    const {
-      grid,
-      position,
-      next,
-      clearingLines,
-      spinned: spinnedPiece,
-      ...rest
-    } = data
-    const newData: TetrisStateData = {
-      ...rest,
-      operation,
-      grid: [...grid.map(r => [...r])],
-      position: [...position],
-      next: [...next],
-      clearingLines: operation === LOCK ? [...clearingLines || []] : [],
-      spinned: spinnedPiece,
-    }
-    Object.assign(this, newData)
+    this.grid = [...data.grid.map(r => [...r])]
+    this.piece = data.piece
+    this.position = [...data.position]
+    this.rotation = data.rotation
+    this.hold = data.hold
+    this.canHold = data.canHold
+    this.next = [...data.next]
+    this.key = data.key
+    this.keyUp = data.keyUp
+    this.clearingLines = operation === LOCK ? [...data.clearingLines || []] : []
+    this.operation = operation
+    this.spin = data.spin
+    this.spinned = data.spinned
+    this.combo = data.combo
+    this.b2b = data.b2b
   }
 
   public static initFromCompiled(data: Compiled): TetrisState {

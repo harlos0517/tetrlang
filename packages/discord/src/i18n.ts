@@ -1,6 +1,7 @@
-
 import { Locale } from 'discord.js'
 import { readFileSync } from 'fs'
+import { dirname, join } from 'path'
+import { fileURLToPath } from 'url'
 import YAML from 'yaml'
 
 export const LANGUAGE = Locale
@@ -14,9 +15,11 @@ export const LANGUAGES = [
 
 const FALLBACK_LANGUAGE = Locale.EnglishUS
 
+const __dirname = dirname(fileURLToPath(import.meta.url))
+
 const dictionary = Object.fromEntries(
   LANGUAGES.map(lang => {
-    const filePath = `./src/i18n/${lang}.yml`
+    const filePath = join(__dirname, `../../i18n/${lang}.yml`)
     const fileContent = readFileSync(filePath, 'utf8')
     return [lang, YAML.parse(fileContent)]
   }),
@@ -30,7 +33,7 @@ export const t = (
   const dict = dictionary[lang] || dictionary[FALLBACK_LANGUAGE]
   const raw = dict?.[key] || key
 
-  const translation = raw.replace(/\$\d+/g, token => {
+  const translation = raw.replace(/\$\d+/g, (token: string) => {
     const idx = parseInt(token, 10) - 1
     return idx >= 0 && idx < vars.length ? String(vars[idx]) : ''
   })

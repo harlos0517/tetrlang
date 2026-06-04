@@ -1,0 +1,51 @@
+{
+  "name": "tetrlang-renderer",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Canvas and GIF renderer for tetrlang-core",
+  "author": "Harlos <murataharu0517@gmail.com>",
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "hun2.ttf"
+  ],
+  "scripts": {
+    "build": "tsc --build",
+    "dev": "tsc --build --watch",
+    "cli": "tsx src/cli.ts"
+  },
+  "peerDependencies": {
+    "tetrlang-core": ">=0.0.1"
+  },
+  "dependencies": {
+    "canvas": "^3.1.2",
+    "commander": "^14.0.3",
+    "sharp": "^0.34.3"
+  },
+  "devDependencies": {
+    "tetrlang-core": "workspace:*"
+  },
+  "keywords": [
+    "tetris",
+    "tetrlang",
+    "game",
+    "canvas",
+    "gif",
+    "renderer"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/harlos0517/tetrlang"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

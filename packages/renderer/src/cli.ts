@@ -1,10 +1,7 @@
-import compiler from '@/compiler'
-import { generateGif } from '@/gif'
-import { createFrame } from '@/renderer'
-import { TetrisState } from '@/tetris'
-import { KEY, LOCK, PIECE, ROTATION } from '@/types'
 import { Command } from 'commander'
 import sharp from 'sharp'
+import { KEY, LOCK, parseTetrlang, PIECE, ROTATION, TetrisSession, TetrisState } from 'tetrlang-core'
+import { createFrame, generateGif } from 'tetrlang-renderer'
 
 const program = new Command()
 
@@ -17,7 +14,7 @@ program.command('debug')
   .description('Debug the input.')
   .argument('<string>', 'string to split')
   .action(str => {
-    console.log(JSON.stringify(compiler(str), null, 2))
+    console.log(JSON.stringify(parseTetrlang(str), null, 2))
   })
 
 program.command('gen')
@@ -27,12 +24,14 @@ program.command('gen')
   .option('-d, --delay [ms]', 'frame delay in milliseconds', '500')
   .option('-s, --with-step', 'show consecutive moving steps', false)
   .action(async(str, options) => {
-    const compiled = compiler(str)
+    const compiled = parseTetrlang(str)
+    const session = new TetrisSession(compiled)
+    session.generate(compiled)
     const gifOptions = {
       delay: parseInt(options.delay, 10),
       withStep: options.withStep,
     }
-    await generateGif(compiled, gifOptions, options.output)
+    await generateGif(session, gifOptions, options.output)
     console.log(`GIF generated at ${options.output}`)
   })
 

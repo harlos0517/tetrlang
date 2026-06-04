@@ -1,17 +1,17 @@
 import {
-  Compiled,
+  type Compiled,
   CONNECTOR,
   HOLD,
   LOCK,
   MOVES,
-  Operation,
+  type Operation,
   PIECE,
   PIECES,
   ROTATES,
-  Row,
+  type Row,
   ROW_SEPARATOR,
   SEPARATOR,
-} from './types'
+} from './types.js'
 
 const parseRow = (row: string): Row | null => {
   if (row === '') return null
@@ -75,7 +75,7 @@ const parseOperations = <HasOrder extends boolean>(
   })
 }
 
-export default (input: string): Compiled => {
+export const parseTetrlang = (input: string): Compiled => {
   const [context, orderString, opString] = input.split(SEPARATOR)
   if (context === undefined || opString === undefined || orderString === undefined)
     throw new Error(`Invalid input: ${input}`)
@@ -106,7 +106,6 @@ export default (input: string): Compiled => {
   if (holding.length > 1 || (holding && !PIECES.includes(holding as PIECE)))
     throw new Error(`Invalid holding piece: ${holding}`)
   if (orderString && nextString.length < operations.length)
-    // eslint-disable-next-line @stylistic/max-len
     throw new Error(`Next pieces count (${nextString.length}) must >= operations count (${operations.length})`)
 
   const next = nextString.split('')

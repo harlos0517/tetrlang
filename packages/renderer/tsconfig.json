@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "module": "nodenext",
+    "types": [
+      "node"
+    ],
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "declaration": true,
+    "verbatimModuleSyntax": true,
+    "skipLibCheck": true
+  }
+}

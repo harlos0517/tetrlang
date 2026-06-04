@@ -1,7 +1,6 @@
-import { TetrisSession, TetrisState, TetrisStateData } from '@/tetris'
-import sharp, { GifOptions } from 'sharp'
-import { createFrame } from './renderer'
-import { Compiled, HOLD, LOCK, MOVE, ROTATE } from './types'
+import sharp, { type GifOptions } from 'sharp'
+import { HOLD, LOCK, MOVE, ROTATE, TetrisSession, TetrisState, type TetrisStateData } from 'tetrlang-core'
+import { createFrame } from './renderer.js'
 
 const delayMap: Record<TetrisStateData['operation'], number> = {
   [MOVE.FALL]: 1,
@@ -46,14 +45,12 @@ const fixDelayTime = (delay: number) => {
 }
 
 export const generateGif = async(
-  compiled: Compiled,
+  session: TetrisSession,
   options: GifOptions & { delay?: number, withStep?: boolean } = {},
   outputPath?: string,
 ) => {
   const { delay = 200, withStep = false, ...optionsExceptDelay } = options
 
-  const session = new TetrisSession(compiled)
-  session.generate(compiled)
   const states = session.states
   if (states.length === 0) throw new Error('No states to generate GIF from.')
 

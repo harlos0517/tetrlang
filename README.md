@@ -3,6 +3,7 @@
 ## Tetrlang code format
 The Tetrlang code is composed of three parts:
 `board:order:operations`
+
 ### Board
 `board` consists of rows from bottom to top, separated by commas.
 You indicate the garbage holes with column numbers 0 to 9 for each row: `1356`
@@ -16,12 +17,14 @@ You indicate the garbage holes with column numbers 0 to 9 for each row: `1356`
   Tip: N rows of clean garbage or well with height N comes with N commas.
 - Simply omit all if the board is empty.
 Example: `0,,,,4,,,,345,45,4-79,124-79,124-`
+
 ### Order
 `order` is a sequence of pieces in the order they are spawned.
 - Default available pieces are I, J, L, O, S, T, Z.
 - If you want to specify the pieces in operations, you can omit this part.
 - You can also specify initial hold piece by prepending the piece and `|`.
 Example: `I|JLSOTTZI`, `JLSOTTZI`
+
 ### Operations
 `operations` is a sequence of operations to perform on the board.
 - Each piece is separated by `;`, which implictly indicates a lock (space).
@@ -32,17 +35,18 @@ Example: `I|JLSOTTZI`, `JLSOTTZI`
 - drop: `.` (fall / one step down), `_` (soft drop to bottom)
 Example: (order provided) `>r;_]_z;|<<;|[>_z;`
 Example: (order not provided) `I>r;S_]_z;O<<;|Z[>_z;`
+
 ### Full working examples
 - no order provided: `2,,,,-1,-2,,,-3::Jr[;Tr[;S[r_r;Z[_r;`
 - order provided:  `2,,,,-1,-2,,,-3:S|JTLZ:r[;r[;|[r_r;[_r;`
-- Perfect Clear Opening: `:I|TSZILJOTSZ:r[;_[;[;];r>>;z];]<;z>;;z_z<;`
+- Perfect Clear Opening: `:I|TSZILJOTSZ:r[;_[;[;];r>>;z];]<;z>;;z_z;`
 
 ## spec
 ```
 col = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
 connector = '-'
 row_sep = ','
-hold = '/'
+hold = '|'
 sep = ':'
 piece = 'I' | 'J' | 'L' | 'O' | 'S' | 'Z' | 'T'
 rotate = 'o' | 'r' | 'a' | 'z'
@@ -69,4 +73,4 @@ tetrio_operations = board? sep (order sep op_with_order* | sep op_no_order*)
 - [x] spin indicator
 - [ ] everything configurable
 - [ ] presets
-- [ ] more styles
+- [ ] renderer: more styles

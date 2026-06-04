@@ -1,5 +1,3 @@
-import { generateGif } from '@/gif'
-import { t, tMap } from '@/i18n'
 import {
   AttachmentBuilder,
   ChatInputCommandInteraction,
@@ -10,7 +8,9 @@ import {
   SlashCommandBuilder,
 } from 'discord.js'
 import dotenv from 'dotenv'
-import compiler from './compiler'
+import { parseTetrlang, TetrisSession } from 'tetrlang-core'
+import { generateGif } from 'tetrlang-renderer'
+import { t, tMap } from './i18n.js'
 
 dotenv.config()
 
@@ -67,7 +67,6 @@ const commands = [
 client.once(Events.ClientReady, async readyClient => {
   console.log(`Discord bot ready! Logged in as ${readyClient.user.tag}`)
 
-  // Register commands globally
   try {
     console.log('Registering slash commands...')
     await readyClient.application?.commands.set(commands)
@@ -118,10 +117,11 @@ async function handleTetrlangCommand(interaction: ChatInputCommandInteraction) {
 
   const gifOptions = { delay: delay ?? DELAY_MS, withStep: withStep || false }
 
-  const compiled = compiler(code)
-  const gifBuffer = await generateGif(compiled, gifOptions) as Buffer
+  const compiled = parseTetrlang(code)
+  const session = new TetrisSession(compiled)
+  session.generate(compiled)
+  const gifBuffer = await generateGif(session, gifOptions) as Buffer
 
-  // Create attachment and send
   const attachment = new AttachmentBuilder(gifBuffer, { name: 'tetris.gif' })
 
   await interaction.editReply({
@@ -130,7 +130,6 @@ async function handleTetrlangCommand(interaction: ChatInputCommandInteraction) {
   })
 }
 
-// Login with bot token
 const token = process.env.DISCORD_TOKEN
 if (!token) {
   console.error('DISCORD_TOKEN environment variable is required')
