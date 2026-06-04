@@ -19,7 +19,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 
 const dictionary = Object.fromEntries(
   LANGUAGES.map(lang => {
-    const filePath = join(__dirname, `../../i18n/${lang}.yml`)
+    const filePath = join(__dirname, `../i18n/${lang}.yml`)
     const fileContent = readFileSync(filePath, 'utf8')
     return [lang, YAML.parse(fileContent)]
   }),
