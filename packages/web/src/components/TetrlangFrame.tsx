@@ -94,7 +94,7 @@ const TetrlangFrame = ({ state }: TetrlangFrameProps) => {
           textAnchor="middle"
           fill="black"
         >{LINES_MAP[clearingLines.length]}</text>}
-        {spin !== 'mini' && <text
+        {spin === 'mini' && <text
           {...point(-3, 7)}
           fontSize={CELL_SIZE * 0.75}
           textAnchor="middle"
