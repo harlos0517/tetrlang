@@ -63,12 +63,9 @@ export class TetrisSession {
         }
       }
     } catch(error) {
-      if (error instanceof TetrisGameOver) {
-        this.add(error.state)
-      } else if (error instanceof TetrisOperationError) {
-        this.add(error.state)
-      } else
-        throw error
+      if (error instanceof TetrisGameOver) this.add(error.state)
+      else if (error instanceof TetrisOperationError) this.add(error.state)
+      else throw error
     }
 
     this.generated = true

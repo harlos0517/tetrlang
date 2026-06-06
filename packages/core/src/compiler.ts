@@ -29,8 +29,12 @@ const parseRow = (row: string): Row | null => {
   while (i < row.length) {
     const char = row[i++]
 
+    // Handle empty row
+    if (row === '-')
+      return [false, false, false, false, false, false, false, false, false, false]
+
     // Handle range_begin (like "-2")
-    if (char === CONNECTOR && isFirst()) {
+    else if (char === CONNECTOR && isFirst()) {
       const endCol = parseInt(row[i++])
       for (let col = 0; col <= endCol; col++) result[col] = false
 
@@ -105,8 +109,11 @@ export const parseTetrlang = (input: string): Compiled => {
 
   if (holding.length > 1 || (holding && !PIECES.includes(holding as PIECE)))
     throw new Error(`Invalid holding piece: ${holding}`)
-  if (orderString && nextString.length < operations.length)
-    throw new Error(`Next pieces count (${nextString.length}) must >= operations count (${operations.length})`)
+  if (orderString && nextString.length < operations.length) {
+    throw new Error(
+      `Next pieces count (${nextString.length}) must >= operations count (${operations.length})`,
+    )
+  }
 
   const next = nextString.split('')
   if (next.some(n => !PIECES.includes(n as PIECE)))
