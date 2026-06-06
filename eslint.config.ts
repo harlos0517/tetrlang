@@ -1,43 +1,38 @@
 import js from '@eslint/js'
 import stylistic from '@stylistic/eslint-plugin'
 import parser from '@typescript-eslint/parser'
+import { defineConfig } from 'eslint/config'
 import globals from 'globals'
-import tseslint, { ConfigArray } from 'typescript-eslint'
+import tseslint from 'typescript-eslint'
 
-export default tseslint.config(
+export default defineConfig(
   {
     ignores: ['node_modules', 'dist'],
   },
   {
     extends: [
       js.configs.recommended,
-      ...tseslint.configs.recommended,
+      tseslint.configs.recommended,
     ],
     files: ['**/*.{ts,tsx,js,jsx}'],
     ignores: ['**/*.d.ts'],
     languageOptions: {
-      ecmaVersion: 2020,
-      globals: globals.browser,
+      globals: globals.node,
       parser,
       parserOptions: {
         ecmaVersion: 'latest',
         sourceType: 'module',
       },
     },
-    settings: {
-      react: {
-        version: 'detect',
-      },
-    },
     plugins: {
-      ts: tseslint.plugin,
       '@stylistic': stylistic,
     },
     rules: {
       'curly': ['warn', 'multi-or-nest'],
       'object-shorthand': ['warn', 'always'],
       'eqeqeq': ['warn', 'always'],
-      'no-unused-vars': ['warn', { 'argsIgnorePattern': '^_' }],
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': ['warn', { 'argsIgnorePattern': '^_' }],
       '@stylistic/max-len': ['warn', 100],
       '@stylistic/indent': ['warn', 2],
       '@stylistic/semi': ['warn', 'never'],
@@ -65,7 +60,6 @@ export default tseslint.config(
           singleline: { delimiter: 'comma', requireLast: false },
         },
       ],
-      '@typescript-eslint/no-unused-vars': 'off',
     },
   },
-) as ConfigArray
+)
