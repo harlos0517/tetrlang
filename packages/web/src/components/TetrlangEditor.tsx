@@ -1,4 +1,15 @@
-import { Box, Button, Code, Divider, Group, Slider, Stack, Text, TextInput, Title } from '@mantine/core'
+import {
+  Box,
+  Button,
+  Code,
+  Divider,
+  Group,
+  Slider,
+  Stack,
+  Text,
+  TextInput,
+  Title,
+} from '@mantine/core'
 import { compressToEncodedURIComponent, decompressFromEncodedURIComponent } from 'lz-string'
 import { useEffect, useMemo, useState } from 'react'
 import { TetrisSession, parseTetrlang } from 'tetrlang-core'
@@ -86,7 +97,7 @@ const TetrlangEditor = () => {
             label="Board Code"
             value={boardCode}
             onChange={e => {
-              const filtered = e.currentTarget.value.replace(/[^0-9-]/g, '')
+              const filtered = e.currentTarget.value.replace(/[^0-9-,]/g, '')
               setBoardCode(filtered)
             }}
           />
